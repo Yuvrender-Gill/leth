@@ -14,5 +14,8 @@ func main() {
 	var input string
 	fmt.Println("enter contract to compile:")
 	fmt.Scanln(&input)
-	core.Compile(input)
+	err := core.Compile(input)
+	if err != nil {
+		fmt.Println(err, ": compilation error. try removing build/ directory.")
+	}
 }
