@@ -2,8 +2,10 @@ package main
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/noot/leth/core"
+	"github.com/noot/leth/new"
 )
 
 func main() {
@@ -14,10 +16,21 @@ func main() {
 	// fmt.Scanln(&input)
 	// path, _ := filepath.Abs("./contracts/" + input + ".sol")
 	// fmt.Println("compiling file", path)
-	err := core.Compile()
+	contracts, err := core.Compile()
 	if err != nil {
-		fmt.Println(err, ": compilation error. try removing build/ directory.")
+		log.Fatal(err, ": compilation error")
 	} else {
 		fmt.Println("compilation completed. saving binaries in build/ directory.")
+	}
+
+	//fmt.Println(contracts)
+	contractName := new.ContractNameFromPath(contracts[0])
+	//fmt.Println(contractName)
+	exampleContract, err := new.Contract(contractName[0:len(contractName) - 4])
+	if err != nil {
+		fmt.Println(err)
+	}
+	if false {
+		fmt.Println(exampleContract)
 	}
 }

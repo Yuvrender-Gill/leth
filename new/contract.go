@@ -2,6 +2,7 @@ package new
 
 import (
 	"path/filepath"
+	"fmt"
 	"io/ioutil"
 
 	"github.com/ethereum/go-ethereum/accounts/abi"
@@ -9,16 +10,21 @@ import (
 
 func ContractFromPath(pathStr string) (*abi.ABI, error) {
 	path, _ := filepath.Abs(pathStr)
-	return contract(path)
+	fmt.Println(path)
+	return contractAbi(path)
 }
 
 // param: name of the contract (without extension)
 func Contract(contract string) (*abi.ABI, error) {
-	path, _ := filepath.Abs('../build/' + contract + '.abi')
-	return contract(path)
+	path, err := filepath.Abs("./build/" + contract + ".abi")
+	if err != nil {
+		return nil, err
+	}
+	contractabi, err := contractAbi(path)
+	return contractabi, err
 }
 
-func contract(pathStr string) (*abi.ABI, error) {
+func contractAbi(pathStr string) (*abi.ABI, error) {
 	file, err := ioutil.ReadFile(pathStr)
 	if err != nil {
 		return nil, err
@@ -30,4 +36,8 @@ func contract(pathStr string) (*abi.ABI, error) {
 		return nil, err
 	}
 	return contractabi, nil	
+}
+
+func ContractNameFromPath(path string) string {
+	return filepath.Base(path)
 }

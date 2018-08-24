@@ -6,9 +6,10 @@ import (
 	"path/filepath"
 	"os/exec"
 	"os"
+	"strings"
 )
 
-func Compile() error {
+func Compile() ([]string, error) {
 	buildexists, err := exists("build/")
 	if buildexists {
 		os.RemoveAll("./build")
@@ -22,20 +23,23 @@ func Compile() error {
 
 	if err != nil {
 		fmt.Printf("error walking the path %q: %v\n", dir, err)
-		return err
+		return nil, err
 	}
+
+	contracts := []string{}
 
 	//fmt.Println(files)
 	for _, file := range files {
 		if(path.Ext(file) == ".sol") {
 			err = compile(file)
 			if err != nil {
-				return err
+				return nil, err
 			}
+			contracts = append(contracts, file)
 		}
 	}
 
-	return nil
+	return contracts, nil
 }
 
 func searchDirectory(dir string, files []string) ([]string, error) {
@@ -65,13 +69,20 @@ func compile(contract string) error {
     arg3 := "build/"
 
     cmd := exec.Command(app, arg0, arg1, arg2, arg3)
-    stdout, err := cmd.Output()
+    stdout, err := cmd.CombinedOutput()
+
+    out := string(stdout)
+    if strings.Contains(out, "Warning") {
+	    fmt.Println("\x1b[93m", out, "\x1b[0m")
+	} else if strings.Contains(out, "Error") {
+	    fmt.Println("\x1b[91m", out, "\x1b[0m")
+	} else {
+		fmt.Println(out)
+	}
 
     if err != nil {
         return err
     }
-
-    print(string(stdout))
 
     // generate abi
     app = "solc"
@@ -87,7 +98,7 @@ func compile(contract string) error {
         return err
     }
 
-    print(string(stdout))	
+    //print(string(stdout))	
     return nil
 }
 
