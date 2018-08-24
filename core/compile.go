@@ -2,16 +2,60 @@ package core
 
 import (
 	"fmt"
+	"path"
+	"path/filepath"
 	"os/exec"
 	"os"
 )
 
-func Compile(contract string) error { 
+func Compile() error {
 	buildexists, err := exists("build/")
-	fmt.Println(buildexists)
-	if !buildexists {
-		os.Mkdir("./build", os.ModePerm)
+	if buildexists {
+		os.RemoveAll("./build")
 	}
+	os.Mkdir("./build", os.ModePerm)
+
+	dir, _ := filepath.Abs("contracts/")
+	files := []string{}
+
+	files, err = searchDirectory(dir, files)
+
+	if err != nil {
+		fmt.Printf("error walking the path %q: %v\n", dir, err)
+		return err
+	}
+
+	//fmt.Println(files)
+	for _, file := range files {
+		if(path.Ext(file) == ".sol") {
+			err = compile(file)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
+}
+
+func searchDirectory(dir string, files []string) ([]string, error) {
+	err := filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
+		files = append(files, path)
+		//fmt.Printf("visited file: %q\n", path)
+		return nil
+	})
+
+	if err != nil {
+		//fmt.Printf("error walking the path %q: %v\n", dir, err)
+		return nil, err
+	}
+
+	//fmt.Println(files)
+	return files, nil
+}
+
+func compile(contract string) error { 
+	fmt.Println("compiling", contract)
 
 	// generate bytecode
     app := "solc"
@@ -19,7 +63,6 @@ func Compile(contract string) error {
     arg1 := contract
     arg2 := "-o"
     arg3 := "build/"
-
 
     cmd := exec.Command(app, arg0, arg1, arg2, arg3)
     stdout, err := cmd.Output()
