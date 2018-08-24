@@ -7,19 +7,20 @@ import (
 	"os/exec"
 	"os"
 	"strings"
+
+	"github.com/noot/leth/logger"
 )
 
 func Compile() ([]string, error) {
-	buildexists, err := exists("build/")
+	buildexists, err := Exists("build/")
 	if buildexists {
 		os.RemoveAll("./build")
 	}
 	os.Mkdir("./build", os.ModePerm)
 
 	dir, _ := filepath.Abs("contracts/")
-	files := []string{}
 
-	files, err = searchDirectory(dir, files)
+	files, err := SearchDirectory(dir)
 
 	if err != nil {
 		fmt.Printf("error walking the path %q: %v\n", dir, err)
@@ -42,7 +43,8 @@ func Compile() ([]string, error) {
 	return contracts, nil
 }
 
-func searchDirectory(dir string, files []string) ([]string, error) {
+func SearchDirectory(dir string) ([]string, error) {
+	files := []string{}
 	err := filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
 		files = append(files, path)
 		//fmt.Printf("visited file: %q\n", path)
@@ -59,7 +61,7 @@ func searchDirectory(dir string, files []string) ([]string, error) {
 }
 
 func compile(contract string) error { 
-	fmt.Println("compiling", contract)
+	logger.Info(fmt.Sprintf("compiling %s", contract))
 
 	// generate bytecode
     app := "solc"
@@ -73,9 +75,9 @@ func compile(contract string) error {
 
     out := string(stdout)
     if strings.Contains(out, "Warning") {
-	    fmt.Println("\x1b[93m", out, "\x1b[0m")
+    	logger.CompilerWarn(out)
 	} else if strings.Contains(out, "Error") {
-	    fmt.Println("\x1b[91m", out, "\x1b[0m")
+		logger.CompilerError(out)
 	} else {
 		fmt.Println(out)
 	}
@@ -102,7 +104,7 @@ func compile(contract string) error {
     return nil
 }
 
-func exists(path string) (bool, error) {
+func Exists(path string) (bool, error) {
     _, err := os.Stat(path)
     if err == nil { return true, nil }
     if os.IsNotExist(err) { return false, nil }

@@ -1,0 +1,10 @@
+{
+	"networks": {
+		"rinkeby": {
+			"url": "https://rinkeby.infura.io",
+			"from": "0xe8b7b81f281a947840de4b23f40442b3843c5f49",
+			"keystore": "./keystore",
+			"password": "password"
+		}
+	}
+}
