@@ -12,8 +12,14 @@ sudo apt-get update
 sudo apt-get install solc
 ```
 
-# usage
+# get 
 
 `go get github.com/noot/leth`
 
 `go get github.com/ethereum/go-ethereum`
+
+# usage
+
+`go build`
+
+to compile all contracts in contracts/ directory: `./leth compile`
