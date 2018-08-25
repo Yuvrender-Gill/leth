@@ -18,11 +18,14 @@ import (
 )
 
 type Config struct {
-	Networks interface{} `json:"networks"`
+	Networks map[string]Network 	`json:"networks"`
 }
 
 type Network struct {
-	Params map[string]string
+	Url string						`json:"url"`
+	From string						`json:"from"`
+	Keystore string					`json:"keystore"`
+	Password string					`json:"password"`
 }
 
 func main() {
@@ -30,18 +33,18 @@ func main() {
 
 	help := flag.Bool("help", false, "print out command-line options")
 
+	compileCommand := flag.NewFlagSet("compile", flag.ExitOnError)
+	deployCommand := flag.NewFlagSet("deploy", flag.ExitOnError)
+	network := deployCommand.String("network", "default", "specify network to connect to (configured in config.json)")
+
 	flag.Parse() 
 	if *help {
 		fmt.Println("\t\x1b[93mleth help\x1b[0m")
 		fmt.Println("\tleth compile: compile all contracts in contracts/ directory")
 		os.Exit(0)
-	}
-
-	compileCommand := flag.NewFlagSet("compile", flag.ExitOnError)
-	deployCommand := flag.NewFlagSet("deploy", flag.ExitOnError)
+	} 
 
 	// subcommands
-	// ./b
 	if len(os.Args) > 1 {
 		switch os.Args[1]{
 			case "compile":
@@ -62,7 +65,7 @@ func main() {
 	} 
 
 	if deployCommand.Parsed() {
-		deploy()
+		deploy(*network)
 		os.Exit(0)
 	}
 
@@ -88,7 +91,10 @@ func compile() ([]string) {
 	return contracts
 }
 
-func deploy() {
+// set up deployment to network
+// compile, read config, dial network, set up accounts
+func deploy(network string) {
+	// compilation of contracts, if needed
 	contracts := []string{}
 	buildexists, err := core.Exists("build/")
 	if !buildexists {
@@ -118,38 +124,34 @@ func deploy() {
 		names = append(names, name)
 	}
 
-	logger.Info(fmt.Sprintf("deploying %s", names))
+	logger.Info(fmt.Sprintf("deploying %s to network %s", names, network))
 
+	// note: we want to dial the client and read accounts from there
+	// we can use this instead if they wish to specify a keystore for a network
 	ks := newKeyStore("./keystore")
 	ksaccounts := ks.Accounts()
 	for i, account := range ksaccounts {
 		fmt.Println("account", i, ":", account.Address.Hex())
 	}
 
+	// read config file
 	file, err := readConfig()
 	if err != nil {
 		logger.Error("no config.json file found.")
 		os.Exit(1)
 	}
-	//fmt.Println(string(file))
 
 	config, err := unmarshalConfig(file)
 	if err != nil {
 		logger.Error(fmt.Sprintf("could not read config.json: %s", err))
 	}
 
-	configmap := config.(map[string]interface{})
-	fmt.Println(configmap)
-	//fmt.Println(network)
-	//if ok {
-	//	fmt.Println(def)
-
-		// client, err := create.Client(def.url)
-		// if err != nil {
-		// 	logger.Error("incorrect url in config.json")
-		// }
-		// fmt.Println(client)
-	//}
+	// dial client for network
+	client, err := create.Client(config.Networks[network].Url)
+	if err != nil {
+		logger.Error("cannot dial client; likely incorrect url in config.json")
+	}
+	fmt.Println(client)
 }
 
 
@@ -162,8 +164,8 @@ func readConfig() ([]byte, error) {
 	return file, nil
 }
 
-func unmarshalConfig(file []byte) (interface{}, error) {
-	var conf interface{}
+func unmarshalConfig(file []byte) (*Config, error) {
+	conf := new(Config)
 	err := json.Unmarshal(file, conf)
 	if err != nil {
 		return nil, err
