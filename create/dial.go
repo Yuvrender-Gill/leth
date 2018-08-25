@@ -1,4 +1,4 @@
-package new
+package create
 
 import (
 	"github.com/ethereum/go-ethereum/ethclient"

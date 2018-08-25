@@ -7,14 +7,23 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"encoding/json"
 	"io/ioutil"
 
 	"github.com/noot/leth/core"
-	"github.com/noot/leth/new"
+	"github.com/noot/leth/create"
 	"github.com/noot/leth/logger"
 
 	"github.com/ethereum/go-ethereum/accounts/keystore"
 )
+
+type Config struct {
+	Networks interface{} `json:"networks"`
+}
+
+type Network struct {
+	Params map[string]string
+}
 
 func main() {
 	//client := leth.Dial("http://localhost:8545")
@@ -105,7 +114,7 @@ func deploy() {
 	names := []string{}
 
 	for _, contract := range contracts {
-		name := new.ContractNameFromPath(contract)
+		name := create.ContractNameFromPath(contract)
 		names = append(names, name)
 	}
 
@@ -117,13 +126,32 @@ func deploy() {
 		fmt.Println("account", i, ":", account.Address.Hex())
 	}
 
-	config, err := readConfig()
+	file, err := readConfig()
 	if err != nil {
 		logger.Error("no config.json file found.")
 		os.Exit(1)
 	}
-	fmt.Println(string(config))
+	//fmt.Println(string(file))
+
+	config, err := unmarshalConfig(file)
+	if err != nil {
+		logger.Error(fmt.Sprintf("could not read config.json: %s", err))
+	}
+
+	configmap := config.(map[string]interface{})
+	fmt.Println(configmap)
+	//fmt.Println(network)
+	//if ok {
+	//	fmt.Println(def)
+
+		// client, err := create.Client(def.url)
+		// if err != nil {
+		// 	logger.Error("incorrect url in config.json")
+		// }
+		// fmt.Println(client)
+	//}
 }
+
 
 func readConfig() ([]byte, error) {
 	path, _ := filepath.Abs("./config.json")
@@ -132,6 +160,15 @@ func readConfig() ([]byte, error) {
 		return nil, err
 	}	
 	return file, nil
+}
+
+func unmarshalConfig(file []byte) (interface{}, error) {
+	var conf interface{}
+	err := json.Unmarshal(file, conf)
+	if err != nil {
+		return nil, err
+	}
+	return conf, nil
 }
 
 func newKeyStore(path string) (*keystore.KeyStore) {
