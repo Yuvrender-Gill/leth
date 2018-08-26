@@ -93,7 +93,7 @@ func deploy(client *ethclient.Client, network Network, contract string, keys *ke
 	}
 
 	txHash := txSigned.Hash()
-	logger.Info(fmt.Sprintf("attempting to send tx %s to from account %s to deploy contract %s", txHash.Hex(), from.Address.Hex(), contract))
+	logger.Info(fmt.Sprintf("attempting to send tx %s to from account %s to deploy contract bytecode %s", txHash.Hex(), from.Address.Hex(), contract))
 
 	err = client.SendTransaction(context.Background(), txSigned)
 	if err != nil {
