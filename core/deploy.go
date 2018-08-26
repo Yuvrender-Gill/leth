@@ -109,7 +109,7 @@ func deploy(client *ethclient.Client, network Network, contract string, keys *ke
 
 	receipt, err := client.TransactionReceipt(context.Background(), txHash)
 	if err != nil {
-		return err
+		receipt = waitOnPendingKovan(client, txHash)
 	}
 
 	if receipt.Status == 0 {
@@ -128,6 +128,15 @@ func waitOnPending(client *ethclient.Client, txHash common.Hash) (*types.Transac
 		tx, pending, _ := client.TransactionByHash(context.Background(), txHash)
 		if !pending { 
 			return tx 
+		}
+	}
+}
+
+func waitOnPendingKovan(client *ethclient.Client, txHash common.Hash) (*types.Receipt) {
+	for {
+		receipt, err := client.TransactionReceipt(context.Background(), txHash)
+		if err == nil {
+			return receipt
 		}
 	}
 }
