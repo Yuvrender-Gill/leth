@@ -12,11 +12,19 @@ sudo apt-get update
 sudo apt-get install solc
 ```
 
+go-ethereum
+
+`go get github.com/ethereum/go-ethereum`
+
+abigen
+```
+cd $GOPATH/src/github.com/ethereum/go-ethereum
+godep go install ./cmd/abigen
+```
+
 # get 
 
 `go get github.com/noot/leth`
-
-`go get github.com/ethereum/go-ethereum`
 
 # usage
 
