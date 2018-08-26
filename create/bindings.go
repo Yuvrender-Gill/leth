@@ -56,11 +56,13 @@ func bind(contract string) (error) {
     arg0 := "--abi"
     arg1 := contract
     arg2 := "--pkg"
-    arg3 := name
-    arg4 := "--out"
-    arg5 := output
+    arg3 := "bind"
+    arg4 := "--type"
+    arg5 := name
+    arg6 := "--out"
+    arg7 := output
 
-    cmd := exec.Command(app, arg0, arg1, arg2, arg3, arg4, arg5)
+    cmd := exec.Command(app, arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7)
     stdout, err := cmd.CombinedOutput()
     if err != nil {
     	return err

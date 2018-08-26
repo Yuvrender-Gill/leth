@@ -14,8 +14,9 @@ import (
 	"github.com/noot/leth/create"
 	"github.com/noot/leth/jsonrpc"
 	"github.com/noot/leth/logger"
+	"github.com/noot/leth/test"
 
-	"github.com/ethereum/go-ethereum/ethclient"
+	//"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ethereum/go-ethereum/accounts"
 	"github.com/ethereum/go-ethereum/accounts/keystore"
 )
@@ -32,6 +33,9 @@ func main() {
 	deployCommand := flag.NewFlagSet("deploy", flag.ExitOnError)
 	network := deployCommand.String("network", "default", "specify network to connect to (configured in config.json)")
 
+	// test subcommand
+	testCommand := flag.NewFlagSet("test", flag.ExitOnError)
+
 	flag.Parse() 
 	if *help {
 		fmt.Println("\t\x1b[93mleth help\x1b[0m")
@@ -46,6 +50,8 @@ func main() {
 				compileCommand.Parse(os.Args[2:])
 			case "deploy":
 				deployCommand.Parse(os.Args[2:])
+			case "test":
+				testCommand.Parse(os.Args[2:])
 			default:
 				// continue
 		}
@@ -61,6 +67,11 @@ func main() {
 
 	if deployCommand.Parsed() {
 		deploy(*network)
+		os.Exit(0)
+	}
+
+	if testCommand.Parsed() {
+		testrun()
 		os.Exit(0)
 	}
 }
@@ -177,8 +188,8 @@ func deploy(network string) {
 	// logger.Info(fmt.Sprintf("block number: %s", blockNum))
 }
 
-func test(client *ethclient.Client) {
-
+func testrun() {
+	test.TestExample()
 }
 
 func readConfig() ([]byte, error) {

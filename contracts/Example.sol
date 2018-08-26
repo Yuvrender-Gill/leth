@@ -1,9 +1,9 @@
 pragma solidity ^0.4.24;
 
 contract Example {
-	address owner;
+	address public owner;
 
-	mapping(address => uint) balance;
+	mapping(address => uint) public balance;
 
 	event Deposit(address sender, uint value);
 
