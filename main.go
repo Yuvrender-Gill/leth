@@ -20,11 +20,14 @@ import (
 )
 
 func main() {
-	//client := leth.Dial("http://localhost:8545")
-
+	// flags
 	help := flag.Bool("help", false, "print out command-line options")
 
+	// compile subcommand and flags
 	compileCommand := flag.NewFlagSet("compile", flag.ExitOnError)
+	bindFlag := compileCommand.Bool("bind", true, "specify whether to create bindings for contracts while compiling")
+
+	// deploy subcommand and flags
 	deployCommand := flag.NewFlagSet("deploy", flag.ExitOnError)
 	network := deployCommand.String("network", "default", "specify network to connect to (configured in config.json)")
 
@@ -51,7 +54,7 @@ func main() {
 
 	if compileCommand.Parsed() {
 		//contractArgs := compileCommand.Args()
-		compile()
+		compile(*bindFlag)
 		os.Exit(0)	
 	} 
 
@@ -72,12 +75,23 @@ func main() {
 	*/
 }
 
-func compile() ([]string) {
+func bind(contracts []string) (error) {
+	fmt.Println(contracts)
+	return nil
+} 
+
+func compile(bindFlag bool) ([]string) {
 	contracts, err := core.Compile()
 	if err != nil {
-		log.Fatal(err, ": compilation error")
+		logger.FatalError(fmt.Sprintf("compilation error: %s", err))
 	} else {
 		logger.Info("compilation completed. saving binaries in build/ directory.")
+	}
+	if bindFlag {
+		err = bind(contracts)
+		if err != nil {
+			logger.FatalError(fmt.Sprintf("could not generate bindings: %s", err))
+		}
 	}
 	return contracts
 }
@@ -90,7 +104,7 @@ func deploy(network string) {
 	buildexists, err := core.Exists("build/")
 	if !buildexists {
 		logger.Info("build/ directory not found. compiling contracts...")
-		compile()
+		compile(false) // don't need to generate bindings for deployment
 	}
 
 	files, err := core.SearchDirectory("./build")
@@ -98,7 +112,7 @@ func deploy(network string) {
 		log.Fatal(err)
 	} else if len(files) < 2 {
 		logger.Info("build/ directory empty. compiling contracts...")
-		compile()
+		compile(false)
 		files, err = core.SearchDirectory("./build")
 	} else {
 		for _, file := range files {

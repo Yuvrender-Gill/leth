@@ -32,3 +32,17 @@ func Exists(path string) (bool, error) {
     if os.IsNotExist(err) { return false, nil }
     return true, err
 }
+
+func SearchDirectory(dir string) ([]string, error) {
+	files := []string{}
+	err := filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
+		files = append(files, path)
+		return nil
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return files, nil
+}

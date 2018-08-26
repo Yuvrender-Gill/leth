@@ -43,23 +43,6 @@ func Compile() ([]string, error) {
 	return contracts, nil
 }
 
-func SearchDirectory(dir string) ([]string, error) {
-	files := []string{}
-	err := filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
-		files = append(files, path)
-		//fmt.Printf("visited file: %q\n", path)
-		return nil
-	})
-
-	if err != nil {
-		//fmt.Printf("error walking the path %q: %v\n", dir, err)
-		return nil, err
-	}
-
-	//fmt.Println(files)
-	return files, nil
-}
-
 func compile(contract string) error { 
 	logger.Info(fmt.Sprintf("compiling %s", contract))
 
