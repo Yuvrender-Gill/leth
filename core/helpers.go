@@ -3,6 +3,7 @@ package core
 import (
 	"os"
 	"encoding/hex"
+	"path"
 	"path/filepath"
 	"io/ioutil"
 	"fmt"
@@ -45,4 +46,52 @@ func SearchDirectory(dir string) ([]string, error) {
 	}
 
 	return files, nil
+}
+
+func SearchDirectoryForSol(dir string) ([]string, error) {
+	files, err := SearchDirectory(dir)
+	if err != nil {
+		return []string{}, err
+	}
+	contracts := []string{}
+
+	//fmt.Println(files)
+	for _, file := range files {
+		if(path.Ext(file) == ".sol") {
+			contracts = append(contracts, file)
+		}
+	}
+
+	return contracts, nil
+}
+
+func SearchDirectoryForAbi(dir string) ([]string, error) {
+	files, err := SearchDirectory(dir)
+	if err != nil {
+		return []string{}, err
+	}
+	contracts := []string{}
+
+	//fmt.Println(files)
+	for _, file := range files {
+		if(path.Ext(file) == ".abi") {
+			contracts = append(contracts, file)
+		}
+	}
+
+	return contracts, nil
+}
+
+func GetContractName(contract string) (string) {
+	base := path.Base(contract)
+	ext := path.Ext(contract)
+	return base[0:len(base)-len(ext)]
+}
+
+func GetContractNames(contracts []string) ([]string) {
+	names := []string{}
+	for _, contract := range contracts {
+		names = append(names, GetContractName(contract))
+	}
+	return names
 }

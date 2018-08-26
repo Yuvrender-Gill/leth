@@ -62,21 +62,16 @@ func main() {
 		deploy(*network)
 		os.Exit(0)
 	}
-
-	
-	/*
-	// initialize new contract object	
-	contractName := new.ContractNameFromPath(contracts[0])
-	exampleContract, err := new.Contract(contractName[0:len(contractName) - 4])
-	if err != nil {
-		fmt.Println(err)
-	}
-	fmt.Println(exampleContract)
-	*/
 }
 
-func bind(contracts []string) (error) {
-	fmt.Println(contracts)
+func bind() (error) {
+	//fmt.Println(contracts)
+	err := create.Bindings()
+	if err != nil {
+		logger.FatalError(fmt.Sprintf("could not create bindings: %s", err))
+	} else {
+		logger.Info("generation of bindings completed. saving bindings in bind/ directory.")
+	}
 	return nil
 } 
 
@@ -88,7 +83,7 @@ func compile(bindFlag bool) ([]string) {
 		logger.Info("compilation completed. saving binaries in build/ directory.")
 	}
 	if bindFlag {
-		err = bind(contracts)
+		err = bind()
 		if err != nil {
 			logger.FatalError(fmt.Sprintf("could not generate bindings: %s", err))
 		}

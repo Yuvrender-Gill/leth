@@ -44,7 +44,7 @@ func Compile() ([]string, error) {
 }
 
 func compile(contract string) error { 
-	logger.Info(fmt.Sprintf("compiling %s", contract))
+	logger.Info(fmt.Sprintf("compiling %s", path.Base(contract)))
 
 	// generate bytecode
     app := "solc"
