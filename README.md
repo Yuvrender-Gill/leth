@@ -23,3 +23,9 @@ sudo apt-get install solc
 `go build`
 
 to compile all contracts in contracts/ directory: `./leth compile`
+
+to deploy contracts to network: `./leth deploy`
+
+the default network to connect to is `default`. if you wish to connect to another network (as specified in config.json), use `./leth deploy --network network_name`
+
+see config.json for example network configurations.
