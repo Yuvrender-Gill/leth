@@ -15,6 +15,7 @@ import (
 	"github.com/noot/leth/client"
 	"github.com/noot/leth/logger"
 
+	"github.com/ethereum/go-ethereum/accounts"
 	"github.com/ethereum/go-ethereum/accounts/keystore"
 )
 
@@ -117,13 +118,13 @@ func deploy(network string) {
 	// read config file
 	file, err := readConfig()
 	if err != nil {
-		logger.Error("no config.json file found.")
+		logger.FatalError("no config.json file found.")
 		os.Exit(1)
 	}
 
 	config, err := unmarshalConfig(file)
 	if err != nil {
-		logger.Error(fmt.Sprintf("could not read config.json: %s", err))
+		logger.FatalError(fmt.Sprintf("could not read config.json: %s", err))
 	}
 
 	ntwk := config.Networks[network]
@@ -142,13 +143,12 @@ func deploy(network string) {
 		if err != nil {
 			logger.FatalError(fmt.Sprintf("unable to get accounts from client url: %s", err))
 		}
-		logger.Info(fmt.Sprintf("accounts: %s", accounts))
+		//logger.Info(fmt.Sprintf("accounts: %s", accounts))
+		printAccounts(accounts)
 	} else {
 		ks := newKeyStore(ntwk.Keystore)
 		ksaccounts := ks.Accounts()
-		for i, account := range ksaccounts {
-			logger.Info(fmt.Sprintf("account %d: %s", i, account.Address.Hex()))
-		}
+		printKeystoreAccounts(ksaccounts)
 		core.Deploy(ethclient, ntwk, names, ks)
 	}
 
@@ -181,4 +181,16 @@ func unmarshalConfig(file []byte) (*core.Config, error) {
 func newKeyStore(path string) (*keystore.KeyStore) {
 	newKeyStore := keystore.NewKeyStore(path, keystore.StandardScryptN, keystore.StandardScryptP)
 	return newKeyStore
+}
+
+func printAccounts(accounts []string) {
+	for i, account := range accounts {
+		logger.Info(fmt.Sprintf("account %d: %s", i, account))
+	}
+}
+
+func printKeystoreAccounts(accounts []accounts.Account) {
+	for i, account := range accounts {
+		logger.Info(fmt.Sprintf("account %d: %s", i, account.Address.Hex()))
+	}
 }

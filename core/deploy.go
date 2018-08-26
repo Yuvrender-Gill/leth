@@ -31,6 +31,17 @@ type Network struct {
 }
 
 func Deploy(client *ethclient.Client, network Network, contracts []string, keys *keystore.KeyStore) error {
+	for _, contract := range contracts {
+		err := deploy(client, network, contract, keys)
+		if err != nil {
+			logger.FatalError(fmt.Sprintf("could not deploy contract: %s", err))
+		}
+	}
+
+	return nil
+}
+
+func deploy(client *ethclient.Client, network Network, contract string, keys *keystore.KeyStore) error {
 	from := new(accounts.Account)
 	if network.From != "" {
 		from.Address = common.HexToAddress(network.From[2:])
@@ -38,9 +49,10 @@ func Deploy(client *ethclient.Client, network Network, contracts []string, keys 
 		logger.FatalError("no from address specified in config.json")
 	}
 
-	data, err := getBytecode(contracts[0])
-	if err != nil {
-		fmt.Println(err)
+	data, err := getBytecode(contract)
+	if err != nil {	
+		logger.Error(fmt.Sprintf("could not get bytecode for contract %s", contract))
+		return err
 	} 
 
 	nonce, _ := client.PendingNonceAt(context.Background(), from.Address)
@@ -51,15 +63,16 @@ func Deploy(client *ethclient.Client, network Network, contracts []string, keys 
 	txSigned, err := keys.SignTxWithPassphrase(*from, network.Password, tx, id)
 	if err != nil {
 		logger.Error(fmt.Sprintf("could not sign tx: %s", err))
+		return err
 	}
 
 	txHash := txSigned.Hash()
-	logger.Info(fmt.Sprintf("attempting to send tx %s to from account %s to deploy contract %s", txHash.Hex(), from.Address.Hex(), contracts[0]))
+	logger.Info(fmt.Sprintf("attempting to send tx %s to from account %s to deploy contract %s", txHash.Hex(), from.Address.Hex(), contract))
 
 	err = client.SendTransaction(context.Background(), txSigned)
 	if err != nil {
-		fmt.Println("could not send tx")
-		fmt.Println(err)
+		logger.Error(fmt.Sprintf("could not send tx %s", txHash))
+		return err
 	}
 
 	return nil
