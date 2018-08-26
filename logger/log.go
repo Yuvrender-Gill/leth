@@ -2,6 +2,7 @@ package logger
 
 import (
 	"fmt"
+	"os"
 )
 
 func Info(out string) {
@@ -14,6 +15,11 @@ func Warn(out string) {
 
 func Error(out string) {
 	fmt.Println("\x1b[91merror:\x1b[0m", out)
+}
+
+func FatalError(out string) {
+	fmt.Println("\x1b[91merror:\x1b[0m", out)	
+	os.Exit(1)
 }
 
 func CompilerWarn(out string) {

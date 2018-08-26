@@ -4,13 +4,20 @@
 			"url": "https://rinkeby.infura.io",
 			"from": "0xe8b7b81f281a947840de4b23f40442b3843c5f49",
 			"keystore": "./keystore",
-			"password": "password"
+			"password": "password",
+			"gasPrice": 10000000,
+			"id": "4"
 		},
 		"rinkeby": {
 			"url": "https://rinkeby.infura.io",
 			"from": "0xe8b7b81f281a947840de4b23f40442b3843c5f49",
 			"keystore": "./keystore",
-			"password": "password"
+			"password": "password",
+			"gasPrice": 10000000
+		},
+		"ganache": {
+			"url": "http://localhost:8545",
+			"gasPrice": 10000000
 		}
 	}
 }

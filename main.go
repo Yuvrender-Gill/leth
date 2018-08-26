@@ -12,21 +12,11 @@ import (
 
 	"github.com/noot/leth/core"
 	"github.com/noot/leth/create"
+	"github.com/noot/leth/client"
 	"github.com/noot/leth/logger"
 
 	"github.com/ethereum/go-ethereum/accounts/keystore"
 )
-
-type Config struct {
-	Networks map[string]Network 	`json:"networks"`
-}
-
-type Network struct {
-	Url string						`json:"url"`
-	From string						`json:"from"`
-	Keystore string					`json:"keystore"`
-	Password string					`json:"password"`
-}
 
 func main() {
 	//client := leth.Dial("http://localhost:8545")
@@ -124,16 +114,6 @@ func deploy(network string) {
 		names = append(names, name)
 	}
 
-	logger.Info(fmt.Sprintf("deploying %s to network %s", names, network))
-
-	// note: we want to dial the client and read accounts from there
-	// we can use this instead if they wish to specify a keystore for a network
-	ks := newKeyStore("./keystore")
-	ksaccounts := ks.Accounts()
-	for i, account := range ksaccounts {
-		fmt.Println("account", i, ":", account.Address.Hex())
-	}
-
 	// read config file
 	file, err := readConfig()
 	if err != nil {
@@ -146,12 +126,37 @@ func deploy(network string) {
 		logger.Error(fmt.Sprintf("could not read config.json: %s", err))
 	}
 
+	ntwk := config.Networks[network]
+
 	// dial client for network
-	client, err := create.Client(config.Networks[network].Url)
+	//ntwk := new(core.Network)
+	ethclient, err := create.Client(ntwk.Url)
 	if err != nil {
-		logger.Error("cannot dial client; likely incorrect url in config.json")
+		logger.FatalError("cannot dial client; likely incorrect url in config.json")
 	}
-	fmt.Println(client)
+
+	logger.Info(fmt.Sprintf("deploying %s to network %s", names, network))
+
+	if ntwk.Keystore == "" {
+		accounts, err := client.GetAccounts(ntwk.Url)
+		if err != nil {
+			logger.FatalError(fmt.Sprintf("unable to get accounts from client url: %s", err))
+		}
+		logger.Info(fmt.Sprintf("accounts: %s", accounts))
+	} else {
+		ks := newKeyStore(ntwk.Keystore)
+		ksaccounts := ks.Accounts()
+		for i, account := range ksaccounts {
+			logger.Info(fmt.Sprintf("account %d: %s", i, account.Address.Hex()))
+		}
+		core.Deploy(ethclient, ntwk, names, ks)
+	}
+
+	blockNum, err := client.GetBlockNumber(ntwk.Url)
+	if err != nil {
+		logger.Error(fmt.Sprintf("%s", err))
+	}
+	logger.Info(fmt.Sprintf("block number: %s", blockNum))
 }
 
 
@@ -164,8 +169,8 @@ func readConfig() ([]byte, error) {
 	return file, nil
 }
 
-func unmarshalConfig(file []byte) (*Config, error) {
-	conf := new(Config)
+func unmarshalConfig(file []byte) (*core.Config, error) {
+	conf := new(core.Config)
 	err := json.Unmarshal(file, conf)
 	if err != nil {
 		return nil, err
