@@ -15,6 +15,7 @@ import (
 	"github.com/noot/leth/jsonrpc"
 	"github.com/noot/leth/logger"
 
+	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ethereum/go-ethereum/accounts"
 	"github.com/ethereum/go-ethereum/accounts/keystore"
 )
@@ -133,10 +134,10 @@ func deploy(network string) {
 
 	ntwk := config.Networks[network]
 	ntwk.Name = network
-	
+
 	// dial client for network
 	//ntwk := new(core.Network)
-	ethclient, err := create.Client(ntwk.Url)
+	client, err := create.Client(ntwk.Url)
 	if err != nil {
 		logger.FatalError("cannot dial client; likely incorrect url in config.json")
 	}
@@ -163,17 +164,21 @@ func deploy(network string) {
 		ks := newKeyStore(ntwk.Keystore)
 		ksaccounts := ks.Accounts()
 		printKeystoreAccounts(ksaccounts)
-		err = core.Deploy(ethclient, ntwk, names, ks)
+		err = core.Deploy(client, ntwk, names, ks)
 		if err != nil {
 			logger.FatalError("could not deploy contracts.")
 		}
 	}
 
-	blockNum, err := jsonrpc.GetBlockNumber(ntwk.Url)
-	if err != nil {
-		logger.Error(fmt.Sprintf("%s", err))
-	}
-	logger.Info(fmt.Sprintf("block number: %s", blockNum))
+	// blockNum, err := jsonrpc.GetBlockNumber(ntwk.Url)
+	// if err != nil {
+	// 	logger.Error(fmt.Sprintf("%s", err))
+	// }
+	// logger.Info(fmt.Sprintf("block number: %s", blockNum))
+}
+
+func test(client *ethclient.Client) {
+
 }
 
 func readConfig() ([]byte, error) {

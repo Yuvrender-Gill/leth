@@ -53,7 +53,7 @@ func deployTestRPC(network Network, contract string) error {
 		return err
 	}
 
-	logger.Info(fmt.Sprintf("contract creation at %s", txHash))
+	logger.Info(fmt.Sprintf("contract creation at tx %s", txHash))
 	return nil
 }
 
@@ -62,7 +62,7 @@ func Deploy(client *ethclient.Client, network Network, contracts []string, keys 
 		logger.Info(fmt.Sprintf("deploying %s.sol to network %s", contract, network.Name))
 		err := deploy(client, network, contract, keys)
 		if err != nil {
-			logger.FatalError(fmt.Sprintf("could not deploy contracts: %s", err))
+			logger.Error(fmt.Sprintf("could not deploy contracts: %s", err))
 		}
 	}
 
@@ -95,7 +95,7 @@ func deploy(client *ethclient.Client, network Network, contract string, keys *ke
 	}
 
 	txHash := txSigned.Hash()
-	logger.Info(fmt.Sprintf("attempting to send tx %s to from account %s to deploy contract bytecode %s", txHash.Hex(), from.Address.Hex(), contract))
+	logger.Info(fmt.Sprintf("attempting to send tx %s to from account %s to deploy contract %s.sol", txHash.Hex(), from.Address.Hex(), contract))
 
 	err = client.SendTransaction(context.Background(), txSigned)
 	if err != nil {
@@ -103,6 +103,31 @@ func deploy(client *ethclient.Client, network Network, contract string, keys *ke
 		return err
 	}
 
-	logger.Info(fmt.Sprintf("contract creation at %s", txHash.Hex()))
+	//logger.Info(fmt.Sprintf("contract creation at tx %s", txHash.Hex()))
+
+	waitOnPending(client, txHash)
+
+	receipt, err := client.TransactionReceipt(context.Background(), txHash)
+	if err != nil {
+		return err
+	}
+
+	if receipt.Status == 0 {
+		logger.Error(fmt.Sprintf("could not deploy contract %s.sol", contract))
+		return nil
+	}
+
+	contractAddr := receipt.ContractAddress
+	logger.Info(fmt.Sprintf("contract deployed at address %s", contractAddr.Hex()))
+	logger.Info(fmt.Sprintf("gas used to deploy contract %s.sol: %s", contract, receipt.GasUsed))
 	return nil
+}
+
+func waitOnPending(client *ethclient.Client, txHash common.Hash) (*types.Transaction) {
+	for {
+		tx, pending, _ := client.TransactionByHash(context.Background(), txHash)
+		if !pending { 
+			return tx 
+		}
+	}
 }

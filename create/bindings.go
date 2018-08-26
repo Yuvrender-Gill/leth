@@ -56,7 +56,7 @@ func bind(contract string) (error) {
     arg0 := "--abi"
     arg1 := contract
     arg2 := "--pkg"
-    arg3 := "bindings"
+    arg3 := name
     arg4 := "--out"
     arg5 := output
 
