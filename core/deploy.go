@@ -119,7 +119,7 @@ func deploy(client *ethclient.Client, network Network, contract string, keys *ke
 
 	contractAddr := receipt.ContractAddress
 	logger.Info(fmt.Sprintf("contract deployed at address %s", contractAddr.Hex()))
-	logger.Info(fmt.Sprintf("gas used to deploy contract %s.sol: %s", contract, receipt.GasUsed))
+	logger.Info(fmt.Sprintf("gas used to deploy contract %s.sol: %d", contract, receipt.GasUsed))
 	return nil
 }
 
