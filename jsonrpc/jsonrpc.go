@@ -11,11 +11,28 @@ import (
 )
 
 type Response struct {
-	Result string			`json:"result"`
+	Result string					`json:"result"`
+}
+
+type ReceiptResponse struct {
+	Result Receipt 					`json:"result"`
 }
 
 type AccountResponse struct {
-	Result []string			`json:"result"`
+	Result []string					`json:"result"`
+}
+
+type Receipt struct {
+	 TransactionHash string 		`json:"transactionHash"`
+     TransactionIndex string 		`json:"transactionIndex"`
+     BlockNumber string 			`json:"blockNumber"`
+     BlockHash string 				`json:"blockHash"`
+     CumulativeGasUsed string 		`json:"cumulativeGasUsed"`
+     GasUsed string 				`json:"gasUsed"`
+     ContractAddress string 		`json:"contractAddress"`
+     Logs []string 					`json:"logs"`
+     LogsBloom string 				`json:"logsBloom"`
+     Status string 					`json:"status"`
 }
 
 // this function gets the current block number by calling "eth_blockNumber"
@@ -71,6 +88,29 @@ func GetBlockNumber(url string) (*big.Int, error) {
 		return nil, err
 	}
 	return new(big.Int).SetBytes(blockNumBytes), nil
+}
+
+func GetTransactionReceipt(txHash string, url string) (Receipt, error) {
+	client := &http.Client{}
+    jsonStr := `{"jsonrpc":"2.0","method":"eth_getTransactionReceipt","params":["` + txHash + `"],"id":1}`
+    jsonBytes := []byte(jsonStr)
+
+    req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonBytes))
+    if err != nil { 
+    	return Receipt{}, err 
+    }
+    req.Header.Set("Content-Type", "application/json")
+    txResp, err := client.Do(req)
+	
+	receiptBody, _ := ioutil.ReadAll(txResp.Body)
+
+	resp := new(ReceiptResponse)
+	err = json.Unmarshal(receiptBody, resp)
+	if err != nil {
+		return Receipt{}, err
+	}
+
+	return resp.Result, nil
 }
 
 /*

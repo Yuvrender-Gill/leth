@@ -53,7 +53,14 @@ func deployTestRPC(network Network, contract string) error {
 		return err
 	}
 
-	logger.Info(fmt.Sprintf("contract creation at tx %s", txHash))
+	receipt, err := jsonrpc.GetTransactionReceipt(txHash, network.Url)
+	if err != nil {
+		return err
+	}
+
+	address := receipt.ContractAddress
+
+	logger.Info(fmt.Sprintf("contract deployed at address %s", address))
 	return nil
 }
 
