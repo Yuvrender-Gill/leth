@@ -145,11 +145,23 @@ func deploy(network string) {
 		}
 		//logger.Info(fmt.Sprintf("accounts: %s", accounts))
 		printAccounts(accounts)
+
+		if ntwk.From == "" {
+			ntwk.From = accounts[0]
+		}
+
+		err = core.DeployTestRPC(ntwk, names)
+		if err != nil {
+			logger.FatalError("could not deploy contracts.")
+		}
 	} else {
 		ks := newKeyStore(ntwk.Keystore)
 		ksaccounts := ks.Accounts()
 		printKeystoreAccounts(ksaccounts)
-		core.Deploy(ethclient, ntwk, names, ks)
+		err = core.Deploy(ethclient, ntwk, names, ks)
+		if err != nil {
+			logger.FatalError("could not deploy contracts.")
+		}
 	}
 
 	blockNum, err := client.GetBlockNumber(ntwk.Url)
@@ -158,7 +170,6 @@ func deploy(network string) {
 	}
 	logger.Info(fmt.Sprintf("block number: %s", blockNum))
 }
-
 
 func readConfig() ([]byte, error) {
 	path, _ := filepath.Abs("./config.json")

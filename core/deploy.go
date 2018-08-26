@@ -3,12 +3,14 @@ package core
 import (
 	"fmt"
 	"encoding/hex"
+	"encoding/json"
 	"context"
 	"math/big"
 	"path/filepath"
 	"io/ioutil"
 
 	"github.com/noot/leth/logger"
+	"github.com/noot/leth/client"
 
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ethereum/go-ethereum/common"
@@ -26,15 +28,65 @@ type Network struct {
 	From string						`json:"from,omitempty"`
 	Keystore string					`json:"keystore,omitempty"`
 	Password string					`json:"password,omitempty"`
+	Gas int64 						`json:"gas,omitempty"`
 	GasPrice int64  				`json:"gasPrice,omitempty"`
 	Id string						`json:"id,omitempty"`
+}
+
+type Transaction struct {
+	From string 					`json:"from"`	
+	To string 						`json:"to,omitempty"`
+	Gas string 						`json:"gas,omitempty"`
+	GasPrice string 				`json:"gasPrice,omitempty"`
+	Value string 					`json:"value,omitempty"`
+	Data string 					`json:"data,omitempty"`
+}
+
+func DeployTestRPC(network Network, contracts []string) error {
+	for _, contract := range contracts {
+		err := deployTestRPC(network, contract)
+		if err != nil {
+			logger.FatalError(fmt.Sprintf("could not deploy contracts: %s", err))
+		}
+	}
+	return nil
+}
+
+func deployTestRPC(network Network, contract string) error {
+	bytecode, err := getBytecode(contract)
+	if err != nil {	
+		logger.Error(fmt.Sprintf("could not get bytecode for contract %s", contract))
+		return err
+	} 
+
+	tx := Transaction{}
+	tx.Data = fmt.Sprintf("%x", bytecode)
+	tx.From = network.From
+	tx.GasPrice = fmt.Sprintf("%x", network.GasPrice)
+	tx.Gas = fmt.Sprintf("%x", network.Gas)
+
+	txBytes, err := json.Marshal(tx)
+	if err != nil {
+		logger.Error("could not create TestRPC transaction")
+		return err
+	}
+	data := fmt.Sprintf("%s", txBytes)
+	//fmt.Println(data)
+
+	txHash, err := client.SendTransaction(data, network.Url)
+	if err != nil {
+		return err
+	}
+
+	logger.Info(fmt.Sprintf("contract creation at %s", txHash))
+	return nil
 }
 
 func Deploy(client *ethclient.Client, network Network, contracts []string, keys *keystore.KeyStore) error {
 	for _, contract := range contracts {
 		err := deploy(client, network, contract, keys)
 		if err != nil {
-			logger.FatalError(fmt.Sprintf("could not deploy contract: %s", err))
+			logger.FatalError(fmt.Sprintf("could not deploy contracts: %s", err))
 		}
 	}
 
@@ -71,10 +123,11 @@ func deploy(client *ethclient.Client, network Network, contract string, keys *ke
 
 	err = client.SendTransaction(context.Background(), txSigned)
 	if err != nil {
-		logger.Error(fmt.Sprintf("could not send tx %s", txHash))
+		logger.Error(fmt.Sprintf("could not send tx %s", txHash.Hex()))
 		return err
 	}
 
+	logger.Info(fmt.Sprintf("contract creation at %s", txHash.Hex()))
 	return nil
 }
 
