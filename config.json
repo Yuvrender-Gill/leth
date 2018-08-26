@@ -15,6 +15,13 @@
 			"password": "password",
 			"gasPrice": 10000000
 		},
+		"ropsten": {
+			"url": "https://ropsten.infura.io",
+			"from": "0xe8b7b81f281a947840de4b23f40442b3843c5f49",
+			"keystore": "./keystore",
+			"password": "password",
+			"gasPrice": 10000000
+		},
 		"ganache": {
 			"url": "http://localhost:8545",
 			"gas": 5000000,

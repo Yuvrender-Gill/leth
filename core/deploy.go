@@ -2,12 +2,9 @@ package core
 
 import (
 	"fmt"
-	"encoding/hex"
 	"encoding/json"
 	"context"
 	"math/big"
-	"path/filepath"
-	"io/ioutil"
 
 	"github.com/noot/leth/logger"
 	"github.com/noot/leth/client"
@@ -18,29 +15,6 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/keystore"
 	"github.com/ethereum/go-ethereum/core/types"
 )
-
-type Config struct {
-	Networks map[string]Network 	`json:"networks"`
-}
-
-type Network struct {
-	Url string						`json:"url,omitempty"`
-	From string						`json:"from,omitempty"`
-	Keystore string					`json:"keystore,omitempty"`
-	Password string					`json:"password,omitempty"`
-	Gas int64 						`json:"gas,omitempty"`
-	GasPrice int64  				`json:"gasPrice,omitempty"`
-	Id string						`json:"id,omitempty"`
-}
-
-type Transaction struct {
-	From string 					`json:"from"`	
-	To string 						`json:"to,omitempty"`
-	Gas string 						`json:"gas,omitempty"`
-	GasPrice string 				`json:"gasPrice,omitempty"`
-	Value string 					`json:"value,omitempty"`
-	Data string 					`json:"data,omitempty"`
-}
 
 func DeployTestRPC(network Network, contracts []string) error {
 	for _, contract := range contracts {
@@ -129,22 +103,4 @@ func deploy(client *ethclient.Client, network Network, contract string, keys *ke
 
 	logger.Info(fmt.Sprintf("contract creation at %s", txHash.Hex()))
 	return nil
-}
-
-func getBytecode(contract string) ([]byte, error) {
-	path, _ := filepath.Abs("./build/" + contract)
-	file, err := ioutil.ReadFile(path)
-	if err != nil {
-		return nil, err
-	}	
-
-	hexString := fmt.Sprintf("%s", file)
-	//fmt.Println(hexString)
-
-	hexBytes, err := hex.DecodeString(hexString)
-	if err != nil {
-		return nil, err
-	}
-
-	return hexBytes, nil
 }
