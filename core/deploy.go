@@ -18,6 +18,7 @@ import (
 
 func DeployTestRPC(network Network, contracts []string) error {
 	for _, contract := range contracts {
+		logger.Info(fmt.Sprintf("deploying %s.sol to network %s", contract, network.Name))
 		err := deployTestRPC(network, contract)
 		if err != nil {
 			logger.FatalError(fmt.Sprintf("could not deploy contracts: %s", err))
@@ -58,6 +59,7 @@ func deployTestRPC(network Network, contract string) error {
 
 func Deploy(client *ethclient.Client, network Network, contracts []string, keys *keystore.KeyStore) error {
 	for _, contract := range contracts {
+		logger.Info(fmt.Sprintf("deploying %s.sol to network %s", contract, network.Name))
 		err := deploy(client, network, contract, keys)
 		if err != nil {
 			logger.FatalError(fmt.Sprintf("could not deploy contracts: %s", err))

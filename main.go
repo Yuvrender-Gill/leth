@@ -117,12 +117,7 @@ func deploy(network string) {
 		}
 	}
 
-	names := []string{}
-
-	for _, contract := range contracts {
-		name := create.ContractNameFromPath(contract)
-		names = append(names, name)
-	}
+	names := core.GetContractNames(contracts)
 
 	// read config file
 	file, err := readConfig()
@@ -137,7 +132,8 @@ func deploy(network string) {
 	}
 
 	ntwk := config.Networks[network]
-
+	ntwk.Name = network
+	
 	// dial client for network
 	//ntwk := new(core.Network)
 	ethclient, err := create.Client(ntwk.Url)
@@ -145,7 +141,7 @@ func deploy(network string) {
 		logger.FatalError("cannot dial client; likely incorrect url in config.json")
 	}
 
-	logger.Info(fmt.Sprintf("deploying %s to network %s", names, network))
+	//logger.Info(fmt.Sprintf("deploying %s to network %s", names, network))
 
 	if ntwk.Keystore == "" {
 		accounts, err := jsonrpc.GetAccounts(ntwk.Url)

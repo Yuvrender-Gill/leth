@@ -5,6 +5,7 @@ type Config struct {
 }
 
 type Network struct {
+	Name string						`json:"name,omitempty"`
 	Url string						`json:"url,omitempty"`
 	From string						`json:"from,omitempty"`
 	Keystore string					`json:"keystore,omitempty"`

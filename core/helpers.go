@@ -10,7 +10,7 @@ import (
 )
 
 func getBytecode(contract string) ([]byte, error) {
-	path, _ := filepath.Abs("./build/" + contract)
+	path, _ := filepath.Abs("./build/" + contract + ".bin")
 	file, err := ioutil.ReadFile(path)
 	if err != nil {
 		return nil, err
@@ -92,6 +92,15 @@ func GetContractNames(contracts []string) ([]string) {
 	names := []string{}
 	for _, contract := range contracts {
 		names = append(names, GetContractName(contract))
+	}
+	return names
+}
+
+func BinToSol(contracts []string) ([]string) {
+	names := []string{}
+	for _, contract := range contracts {
+		name := GetContractName(contract)
+		names = append(names, fmt.Sprintf("%s.sol", name))
 	}
 	return names
 }
