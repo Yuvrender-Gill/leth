@@ -22,6 +22,8 @@ sudo apt-get install solc
 
 `go build`
 
+keystore setup: if you have an existing geth keystore, copy the keystore/ directory into this directory. 
+
 to compile all contracts in contracts/ directory: `./leth compile`
 
 to deploy contracts to network: `./leth deploy`
