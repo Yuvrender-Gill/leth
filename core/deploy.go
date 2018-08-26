@@ -7,7 +7,7 @@ import (
 	"math/big"
 
 	"github.com/noot/leth/logger"
-	"github.com/noot/leth/client"
+	"github.com/noot/leth/jsonrpc"
 
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ethereum/go-ethereum/common"
@@ -47,7 +47,7 @@ func deployTestRPC(network Network, contract string) error {
 	data := fmt.Sprintf("%s", txBytes)
 	//fmt.Println(data)
 
-	txHash, err := client.SendTransaction(data, network.Url)
+	txHash, err := jsonrpc.SendTransaction(data, network.Url)
 	if err != nil {
 		return err
 	}

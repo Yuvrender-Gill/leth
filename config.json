@@ -6,6 +6,7 @@
 			"keystore": "./keystore",
 			"password": "password",
 			"gasPrice": 10000000,
+			"gas": 5000000,
 			"id": "4"
 		},
 		"rinkeby": {
@@ -13,6 +14,7 @@
 			"from": "0xe8b7b81f281a947840de4b23f40442b3843c5f49",
 			"keystore": "./keystore",
 			"password": "password",
+			"gas": 5000000,
 			"gasPrice": 10000000
 		},
 		"ropsten": {
@@ -20,6 +22,7 @@
 			"from": "0xe8b7b81f281a947840de4b23f40442b3843c5f49",
 			"keystore": "./keystore",
 			"password": "password",
+			"gas": 5000000,
 			"gasPrice": 10000000
 		},
 		"kovan": {
@@ -27,6 +30,7 @@
 			"from": "0xe8b7b81f281a947840de4b23f40442b3843c5f49",
 			"keystore": "./keystore",
 			"password": "password",
+			"gas": 5000000,
 			"gasPrice": 10000000
 		},
 		"ganache": {

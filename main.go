@@ -12,7 +12,7 @@ import (
 
 	"github.com/noot/leth/core"
 	"github.com/noot/leth/create"
-	"github.com/noot/leth/client"
+	"github.com/noot/leth/jsonrpc"
 	"github.com/noot/leth/logger"
 
 	"github.com/ethereum/go-ethereum/accounts"
@@ -139,7 +139,7 @@ func deploy(network string) {
 	logger.Info(fmt.Sprintf("deploying %s to network %s", names, network))
 
 	if ntwk.Keystore == "" {
-		accounts, err := client.GetAccounts(ntwk.Url)
+		accounts, err := jsonrpc.GetAccounts(ntwk.Url)
 		if err != nil {
 			logger.FatalError(fmt.Sprintf("unable to get accounts from client url: %s", err))
 		}
@@ -164,7 +164,7 @@ func deploy(network string) {
 		}
 	}
 
-	blockNum, err := client.GetBlockNumber(ntwk.Url)
+	blockNum, err := jsonrpc.GetBlockNumber(ntwk.Url)
 	if err != nil {
 		logger.Error(fmt.Sprintf("%s", err))
 	}
