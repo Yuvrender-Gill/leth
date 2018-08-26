@@ -70,6 +70,11 @@ func GetBlockNumber(url string) (*big.Int, error) {
 	if err != nil {
 		return nil, err
 	}
+	//fmt.Println(resp)
+	if resp.Result == "0x0" {
+		return big.NewInt(0), nil
+	}
+
 	blockNumBytes, err := hex.DecodeString(resp.Result[2:])
 	if err != nil {
 		return nil, err
