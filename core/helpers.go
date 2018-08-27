@@ -19,7 +19,7 @@ func writeDeployment(network string, deployed map[string]string) error {
 		os.Mkdir("./deployed", os.ModePerm)
 	}
 
-	jsonStr, err := json.Marshal(deployed)
+	jsonStr, err := json.MarshalIndent(deployed, "", "\t")
 	if err != nil {
 		return err
 	}

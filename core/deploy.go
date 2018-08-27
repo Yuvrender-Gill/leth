@@ -135,8 +135,7 @@ func deploy(client *ethclient.Client, network Network, contract string, keys *ke
 	}
 
 	if receipt.Status == 0 {
-		logger.Error(fmt.Sprintf("could not deploy contract %s.sol", contract))
-		return "", nil
+		logger.Error(fmt.Sprintf("tx receipt status = 0 for deployment %s.sol", contract))
 	}
 
 	contractAddr := receipt.ContractAddress

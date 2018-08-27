@@ -195,7 +195,7 @@ func deploy(network string) {
 
 	//logger.Info(fmt.Sprintf("deploying %s to network %s", names, network))
 
-	if ntwk.Keystore == "" {
+	if ntwk.Name == "testrpc" || ntwk.Name == "ganache" || ntwk.Name == "ganache-cli" {
 		accounts, err := jsonrpc.GetAccounts(ntwk.Url)
 		if err != nil {
 			logger.FatalError(fmt.Sprintf("unable to get accounts from client url: %s", err))
