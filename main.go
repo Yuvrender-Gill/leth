@@ -25,6 +25,9 @@ func main() {
 	// flags
 	help := flag.Bool("help", false, "print out command-line options")
 
+	// bind subcommand 
+	bindCommand := flag.NewFlagSet("bind", flag.ExitOnError)
+
 	// compile subcommand and flags
 	compileCommand := flag.NewFlagSet("compile", flag.ExitOnError)
 	bindFlag := compileCommand.Bool("bind", true, "specify whether to create bindings for contracts while compiling")
@@ -39,13 +42,18 @@ func main() {
 	flag.Parse() 
 	if *help {
 		fmt.Println("\t\x1b[93mleth help\x1b[0m")
-		fmt.Println("\tleth compile: compile all contracts in contracts/ directory")
+		fmt.Println("\tleth bind: create go bindings for all contracts in contracts/ directory and save in bind/")
+		fmt.Println("\tleth compile: compile all contracts in contracts/ directory and save results in build/. `compile` will automatically execute `bind`; to compile with out binding, use --bind=false")
+		fmt.Println("\tleth deploy: deploy all contracts in contracts/ directory and save results of deployment in deployed/. specify network name with `--network NETWORK_NAME`. if no network is provided, leth will connect to the default network as specified in config.json")
+		fmt.Println("\tleth test: run tests in test/ directory")
 		os.Exit(0)
 	} 
 
 	// subcommands
 	if len(os.Args) > 1 {
 		switch os.Args[1]{
+			case "bind":
+				bindCommand.Parse(os.Args[2:])
 			case "compile":
 				compileCommand.Parse(os.Args[2:])
 			case "deploy":
@@ -56,6 +64,11 @@ func main() {
 				// continue
 		}
 	} else {
+		os.Exit(0)
+	}
+
+	if bindCommand.Parsed() {
+		bind()
 		os.Exit(0)
 	}
 
@@ -76,7 +89,7 @@ func main() {
 	}
 }
 
-func bind() (error) {
+func bind() {
 	//fmt.Println(contracts)
 	err := create.Bindings()
 	if err != nil {
@@ -84,7 +97,6 @@ func bind() (error) {
 	} else {
 		logger.Info("generation of bindings completed. saving bindings in bind/ directory.")
 	}
-	return nil
 } 
 
 func compile(bindFlag bool) ([]string) {
@@ -95,10 +107,7 @@ func compile(bindFlag bool) ([]string) {
 		logger.Info("compilation completed. saving binaries in build/ directory.")
 	}
 	if bindFlag {
-		err = bind()
-		if err != nil {
-			logger.FatalError(fmt.Sprintf("could not generate bindings: %s", err))
-		}
+		bind()
 	}
 	return contracts
 }

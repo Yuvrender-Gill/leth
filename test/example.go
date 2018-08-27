@@ -3,8 +3,10 @@ package test
 import (
 	"fmt"
 	"log"
+	//"math/big"
 
 	"github.com/noot/leth/bind"
+	//"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ethereum/go-ethereum/common"
 )
@@ -15,8 +17,10 @@ func TestExample() {
 	if err != nil {
 		log.Fatalf("Failed to connect to the Ethereum client: %v", err)
 	}
+
+	address := common.HexToAddress("0x70ea7bcc6bba08ae16cc51f0520b8746740560ce")
 	// Instantiate the contract and display its name
-	ex, err := bind.NewExample(common.HexToAddress("0x70ea7bcc6bba08ae16cc51f0520b8746740560ce"), conn)
+	ex, err := bind.NewExample(address, conn)
 	if err != nil {
 		log.Fatalf("Failed to instantiate a contract: %v", err)
 	}
@@ -26,4 +30,7 @@ func TestExample() {
 		log.Fatalf("Failed to retrieve owner: %v", err)
 	}
 	fmt.Println("Contract owner:", owner.Hex())
+
+	// ex.ExampleFilterer.FromBlock = big.NewInt(0)
+	// ex.ExampleFilterer.FilterLogs(context.Background, query)
 }
