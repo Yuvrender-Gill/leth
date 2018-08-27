@@ -1,11 +1,13 @@
 # leth
-golang tools for compiling, testing, and interacting with smart contracts
+golang tools for compiling, deploying, testing, and interacting with smart contracts
 
 work in progress ~
 
+currently compiles + deploys. need to get a nice flow for testing down.
+
 # dependencies
 
-solc 
+solc
 ```
 sudo add-apt-repository ppa:ethereum/ethereum
 sudo apt-get update
@@ -28,14 +30,20 @@ godep go install ./cmd/abigen
 
 # usage
 
-`go build`
+```
+cd $GOPATH/src/github.com/noot/leth
+go build
+go install
+```
 
-keystore setup: if you have an existing geth keystore, copy the keystore/ directory into this directory. 
+keystore setup: if you have an existing geth keystore, copy the keystore/ directory into this directory.
 
-to compile all contracts in contracts/ directory: `./leth compile`
+`leth init` to initialize setup
 
-to deploy contracts to network: `./leth deploy`
+`leth compile` to compile all contracts in contracts/ directory
 
-the default network to connect to is `default`. if you wish to connect to another network (as specified in config.json), use `./leth deploy --network network_name`
+`leth deploy` to deploy contracts to network
+
+the default network to connect to is `default`. if you wish to connect to another network (as specified in config.json), use `leth deploy --network network_name`
 
 see config.json for example network configurations.

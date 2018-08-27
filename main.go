@@ -25,6 +25,9 @@ func main() {
 	// flags
 	help := flag.Bool("help", false, "print out command-line options")
 
+	// init subcommand
+	initCommand := flag.NewFlagSet("init", flag.ExitOnError)
+
 	// bind subcommand 
 	bindCommand := flag.NewFlagSet("bind", flag.ExitOnError)
 
@@ -52,6 +55,8 @@ func main() {
 	// subcommands
 	if len(os.Args) > 1 {
 		switch os.Args[1]{
+			case "init":
+				initCommand.Parse(os.Args[2:])
 			case "bind":
 				bindCommand.Parse(os.Args[2:])
 			case "compile":
@@ -64,6 +69,11 @@ func main() {
 				// continue
 		}
 	} else {
+		os.Exit(0)
+	}
+
+	if initCommand.Parsed() {
+		lethInit()
 		os.Exit(0)
 	}
 
@@ -87,6 +97,27 @@ func main() {
 		testrun()
 		os.Exit(0)
 	}
+}
+
+func lethInit() {
+	files, err := core.SearchDirectory("./")
+	if len(files) > 1 {
+		logger.FatalError("cannot init in non-empty directory.")
+	}
+	if err != nil {
+		logger.Error(fmt.Sprintf("%s", err))
+	}
+
+	os.Mkdir("./contracts", os.ModePerm)
+	os.Mkdir("./keystore", os.ModePerm)
+	os.Mkdir("./test", os.ModePerm)
+
+	jsonStr, err := json.MarshalIndent(core.DefaultConfig, "", "\t")
+	if err != nil {
+		logger.Error(fmt.Sprintf("%s", err))
+	}
+
+	ioutil.WriteFile("./config.json", jsonStr, os.ModePerm)
 }
 
 func bind() {

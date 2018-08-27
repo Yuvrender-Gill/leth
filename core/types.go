@@ -1,5 +1,20 @@
 package core
 
+var DefaultNetwork = Network {
+	Name: "default",
+	Url: "http://localhost:8545",
+	From: "0xADDRESS",
+	Keystore: "./keystore",
+	Password: "",
+	Gas: 100000000,
+	GasPrice: 4700000,
+	Id: "",
+}
+
+var DefaultConfig = Config {
+	Networks: map[string]Network{"default": DefaultNetwork},
+}
+
 type Config struct {
 	Networks map[string]Network 	`json:"networks"`
 }
