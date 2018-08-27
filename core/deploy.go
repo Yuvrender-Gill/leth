@@ -27,7 +27,7 @@ func DeployTestRPC(network Network, contracts []string) error {
 		deployed[contract] = address
 	}
 
-	err := writeDeployment(network.Name, contracts, deployed)
+	err := writeDeployment(network.Name, deployed)
 	if err != nil {
 		return err
 	}
@@ -73,18 +73,25 @@ func deployTestRPC(network Network, contract string) (string, error) {
 }
 
 func Deploy(client *ethclient.Client, network Network, contracts []string, keys *keystore.KeyStore) error {
+	deployed := make(map[string]string)
 	for _, contract := range contracts {
 		logger.Info(fmt.Sprintf("deploying %s.sol to network %s", contract, network.Name))
-		err := deploy(client, network, contract, keys)
+		address, err := deploy(client, network, contract, keys)
 		if err != nil {
-			logger.Error(fmt.Sprintf("could not deploy contracts: %s", err))
+			logger.FatalError(fmt.Sprintf("could not deploy contracts: %s", err))
 		}
+		deployed[contract] = address
+	}
+
+	err := writeDeployment(network.Name, deployed)
+	if err != nil {
+		return err
 	}
 
 	return nil
 }
 
-func deploy(client *ethclient.Client, network Network, contract string, keys *keystore.KeyStore) error {
+func deploy(client *ethclient.Client, network Network, contract string, keys *keystore.KeyStore) (string, error) {
 	from := new(accounts.Account)
 	if network.From != "" {
 		from.Address = common.HexToAddress(network.From[2:])
@@ -95,7 +102,7 @@ func deploy(client *ethclient.Client, network Network, contract string, keys *ke
 	data, err := getBytecode(contract)
 	if err != nil {	
 		logger.Error(fmt.Sprintf("could not get bytecode for contract %s", contract))
-		return err
+		return "", err
 	} 
 
 	nonce, _ := client.PendingNonceAt(context.Background(), from.Address)
@@ -106,7 +113,7 @@ func deploy(client *ethclient.Client, network Network, contract string, keys *ke
 	txSigned, err := keys.SignTxWithPassphrase(*from, network.Password, tx, id)
 	if err != nil {
 		logger.Error(fmt.Sprintf("could not sign tx: %s", err))
-		return err
+		return "", err
 	}
 
 	txHash := txSigned.Hash()
@@ -115,7 +122,7 @@ func deploy(client *ethclient.Client, network Network, contract string, keys *ke
 	err = client.SendTransaction(context.Background(), txSigned)
 	if err != nil {
 		logger.Error(fmt.Sprintf("could not send tx %s", txHash.Hex()))
-		return err
+		return "", err
 	}
 
 	//logger.Info(fmt.Sprintf("contract creation at tx %s", txHash.Hex()))
@@ -129,13 +136,13 @@ func deploy(client *ethclient.Client, network Network, contract string, keys *ke
 
 	if receipt.Status == 0 {
 		logger.Error(fmt.Sprintf("could not deploy contract %s.sol", contract))
-		return nil
+		return "", nil
 	}
 
 	contractAddr := receipt.ContractAddress
 	logger.Info(fmt.Sprintf("contract deployed at address %s", contractAddr.Hex()))
 	logger.Info(fmt.Sprintf("gas used to deploy contract %s.sol: %d", contract, receipt.GasUsed))
-	return nil
+	return contractAddr.Hex(), nil
 }
 
 func waitOnPending(client *ethclient.Client, txHash common.Hash) (*types.Transaction) {

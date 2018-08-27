@@ -10,7 +10,7 @@ import (
 	"fmt"
 )
 
-func writeDeployment(network string, contracts []string, deployed map[string]string) error {
+func writeDeployment(network string, deployed map[string]string) error {
 	deployedexists, err := Exists("deployed/")
 	if err != nil {
 		return err
@@ -25,6 +25,12 @@ func writeDeployment(network string, contracts []string, deployed map[string]str
 	}
 
 	path, _ := filepath.Abs("./deployed/" + network + ".json")
+
+	fileexists, err := Exists(path)
+	if fileexists {
+		os.Remove(path)
+	}
+
 	err = ioutil.WriteFile(path, jsonStr, os.ModePerm)
 	if err != nil {
 		return err
