@@ -3,11 +3,35 @@ package core
 import (
 	"os"
 	"encoding/hex"
+	"encoding/json"
 	"path"
 	"path/filepath"
 	"io/ioutil"
 	"fmt"
 )
+
+func writeDeployment(network string, contracts []string, deployed map[string]string) error {
+	deployedexists, err := Exists("deployed/")
+	if err != nil {
+		return err
+	}
+	if !deployedexists {
+		os.Mkdir("./deployed", os.ModePerm)
+	}
+
+	jsonStr, err := json.Marshal(deployed)
+	if err != nil {
+		return err
+	}
+
+	path, _ := filepath.Abs("./deployed/" + network + ".json")
+	err = ioutil.WriteFile(path, jsonStr, os.ModePerm)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
 
 func getBytecode(contract string) ([]byte, error) {
 	path, _ := filepath.Abs("./build/" + contract + ".bin")

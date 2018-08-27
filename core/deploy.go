@@ -17,21 +17,29 @@ import (
 )
 
 func DeployTestRPC(network Network, contracts []string) error {
+	deployed := make(map[string]string)
 	for _, contract := range contracts {
 		logger.Info(fmt.Sprintf("deploying %s.sol to network %s", contract, network.Name))
-		err := deployTestRPC(network, contract)
+		address, err := deployTestRPC(network, contract)
 		if err != nil {
 			logger.FatalError(fmt.Sprintf("could not deploy contracts: %s", err))
 		}
+		deployed[contract] = address
 	}
+
+	err := writeDeployment(network.Name, contracts, deployed)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
-func deployTestRPC(network Network, contract string) error {
+func deployTestRPC(network Network, contract string) (string, error) {
 	bytecode, err := getBytecode(contract)
 	if err != nil {	
 		logger.Error(fmt.Sprintf("could not get bytecode for contract %s", contract))
-		return err
+		return "", err
 	} 
 
 	tx := Transaction{}
@@ -43,25 +51,25 @@ func deployTestRPC(network Network, contract string) error {
 	txBytes, err := json.Marshal(tx)
 	if err != nil {
 		logger.Error("could not create TestRPC transaction")
-		return err
+		return "", err
 	}
 	data := fmt.Sprintf("%s", txBytes)
 	//fmt.Println(data)
 
 	txHash, err := jsonrpc.SendTransaction(data, network.Url)
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	receipt, err := jsonrpc.GetTransactionReceipt(txHash, network.Url)
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	address := receipt.ContractAddress
 
 	logger.Info(fmt.Sprintf("contract deployed at address %s", address))
-	return nil
+	return address, nil
 }
 
 func Deploy(client *ethclient.Client, network Network, contracts []string, keys *keystore.KeyStore) error {
