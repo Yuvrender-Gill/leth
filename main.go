@@ -6,7 +6,6 @@ import (
 	"flag"
 	"os"
 	"path"
-	"path/filepath"
 	"encoding/json"
 	"io/ioutil"
 
@@ -172,13 +171,13 @@ func deploy(network string) {
 	names := core.GetContractNames(contracts)
 
 	// read config file
-	file, err := readConfig()
+	file, err := core.ReadConfig()
 	if err != nil {
 		logger.FatalError("no config.json file found.")
 		os.Exit(1)
 	}
 
-	config, err := unmarshalConfig(file)
+	config, err := core.UnmarshalConfig(file)
 	if err != nil {
 		logger.FatalError(fmt.Sprintf("could not read config.json: %s", err))
 	}
@@ -230,24 +229,6 @@ func deploy(network string) {
 
 func testrun() {
 	test.TestExample()
-}
-
-func readConfig() ([]byte, error) {
-	path, _ := filepath.Abs("./config.json")
-	file, err := ioutil.ReadFile(path)
-	if err != nil {
-		return nil, err
-	}	
-	return file, nil
-}
-
-func unmarshalConfig(file []byte) (*core.Config, error) {
-	conf := new(core.Config)
-	err := json.Unmarshal(file, conf)
-	if err != nil {
-		return nil, err
-	}
-	return conf, nil
 }
 
 func newKeyStore(path string) (*keystore.KeyStore) {

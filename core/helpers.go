@@ -10,6 +10,24 @@ import (
 	"fmt"
 )
 
+func ReadConfig() ([]byte, error) {
+	path, _ := filepath.Abs("./config.json")
+	file, err := ioutil.ReadFile(path)
+	if err != nil {
+		return nil, err
+	}	
+	return file, nil
+}
+
+func UnmarshalConfig(file []byte) (*Config, error) {
+	conf := new(Config)
+	err := json.Unmarshal(file, conf)
+	if err != nil {
+		return nil, err
+	}
+	return conf, nil
+}
+
 func writeDeployment(network string, deployed map[string]string) error {
 	deployedexists, err := Exists("deployed/")
 	if err != nil {
