@@ -5,29 +5,34 @@ import (
 	"log"
 	//"math/big"
 
-	"github.com/noot/leth/bind"
-	"github.com/noot/leth/create"
+	"github.com/noot/leth/bindings"
+	"github.com/noot/leth/core"
 
-	//"github.com/ethereum/go-ethereum"
-	//"github.com/ethereum/go-ethereum/ethclient"
-	"github.com/ethereum/go-ethereum/common"
+	//"github.com/ethereum/go-ethereum/accounts/abi/bind"
 )
 
 func TestExample() {
-	conn, err := create.Connection("ganache")
+	conn, err := core.NewConnection("ganache")
 	if err != nil {
 		log.Fatalf("Failed to connect to the Ethereum client: %v", err)
 	}	
 
-	// Create an IPC based RPC connection to a remote node
-	// conn, err := ethclient.Dial("http://localhost:8545")
-	// if err != nil {
-	// 	log.Fatalf("Failed to connect to the Ethereum client: %v", err)
-	// }
+	// //auth, err := bind.NewTransactor(strings.NewReader(password), "my awesome super secret password")
 
-	address := common.HexToAddress("0x70ea7bcc6bba08ae16cc51f0520b8746740560ce")
+	// // Create an IPC based RPC connection to a remote node
+	// // conn, err := ethclient.Dial("http://localhost:8545")
+	// // if err != nil {
+	// // 	log.Fatalf("Failed to connect to the Ethereum client: %v", err)
+	// // }
+
+	//address := common.HexToAddress("0xecf168f325e745f196df6a21e4779ddf338e373a")
 	// Instantiate the contract and display its name
-	ex, err := bind.NewExample(address, conn)
+	address, err := core.ContractAddress("Example", "ganache")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	ex, err := bindings.NewExample(address, conn)
 	if err != nil {
 		log.Fatalf("Failed to instantiate a contract: %v", err)
 	}

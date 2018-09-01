@@ -1,5 +1,5 @@
 build/
 keystore/*
 leth
-bind/
+bindings/
 deployed/

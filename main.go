@@ -10,7 +10,6 @@ import (
 	"io/ioutil"
 
 	"github.com/noot/leth/core"
-	"github.com/noot/leth/create"
 	"github.com/noot/leth/jsonrpc"
 	"github.com/noot/leth/logger"
 	"github.com/noot/leth/test"
@@ -44,7 +43,7 @@ func main() {
 	flag.Parse() 
 	if *help {
 		fmt.Println("\t\x1b[93mleth help\x1b[0m")
-		fmt.Println("\tleth bind: create go bindings for all contracts in contracts/ directory and save in bind/")
+		fmt.Println("\tleth bind: create go bindings for all contracts in contracts/ directory and save in bindings/")
 		fmt.Println("\tleth compile: compile all contracts in contracts/ directory and save results in build/. `compile` will automatically execute `bind`; to compile with out binding, use --bind=false")
 		fmt.Println("\tleth deploy: deploy all contracts in contracts/ directory and save results of deployment in deployed/. specify network name with `--network NETWORK_NAME`. if no network is provided, leth will connect to the default network as specified in config.json")
 		fmt.Println("\tleth test: run tests in test/ directory")
@@ -121,11 +120,11 @@ func lethInit() {
 
 func bind() {
 	//fmt.Println(contracts)
-	err := create.Bindings()
+	err := core.Bindings()
 	if err != nil {
 		logger.FatalError(fmt.Sprintf("could not create bindings: %s", err))
 	} else {
-		logger.Info("generation of bindings completed. saving bindings in bind/ directory.")
+		logger.Info("generation of bindings completed. saving bindings in bindings/ directory.")
 	}
 } 
 
@@ -187,7 +186,7 @@ func deploy(network string) {
 
 	// dial client for network
 	//ntwk := new(core.Network)
-	client, err := create.Client(ntwk.Url)
+	client, err := core.Dial(ntwk.Url)
 	if err != nil {
 		logger.FatalError("cannot dial client; likely incorrect url in config.json")
 	}
