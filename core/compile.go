@@ -8,7 +8,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/noot/leth/logger"
+	"github.com/ChainSafeSystems/leth/logger"
 )
 
 func Compile() ([]string, error) {
