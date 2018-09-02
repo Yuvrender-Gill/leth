@@ -3,7 +3,7 @@ golang tools for compiling, deploying, testing, and interacting with smart contr
 
 work in progress ~
 
-currently compiles + deploys. need to get a nice flow for testing down.
+currently compiles + deploys; testing is under development.
 
 # dependencies
 
@@ -26,12 +26,12 @@ godep go install ./cmd/abigen
 
 # get 
 
-`go get github.com/noot/leth`
+`go get github.com/ChainSafeSystems/leth`
 
 # usage
 
 ```
-cd $GOPATH/src/github.com/noot/leth
+cd $GOPATH/src/github.com/ChainSafeSystems/leth
 go build
 go install
 ```
