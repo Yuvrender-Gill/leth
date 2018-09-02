@@ -9,10 +9,10 @@ import (
 	"encoding/json"
 	"io/ioutil"
 
-	"github.com/noot/leth/core"
-	"github.com/noot/leth/jsonrpc"
-	"github.com/noot/leth/logger"
-	"github.com/noot/leth/test"
+	"github.com/ChainSafeSystems/leth/core"
+	"github.com/ChainSafeSystems/leth/jsonrpc"
+	"github.com/ChainSafeSystems/leth/logger"
+	"github.com/ChainSafeSystems/leth/test"
 
 	//"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ethereum/go-ethereum/accounts"

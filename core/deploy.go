@@ -6,8 +6,8 @@ import (
 	"context"
 	"math/big"
 
-	"github.com/noot/leth/logger"
-	"github.com/noot/leth/jsonrpc"
+	"github.com/ChainSafeSystems/leth/logger"
+	"github.com/ChainSafeSystems/leth/jsonrpc"
 
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ethereum/go-ethereum/common"

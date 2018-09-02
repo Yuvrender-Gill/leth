@@ -5,8 +5,8 @@ import (
 	"log"
 	//"math/big"
 
-	"github.com/noot/leth/bindings"
-	"github.com/noot/leth/core"
+	"github.com/ChainSafeSystems/leth/bindings"
+	"github.com/ChainSafeSystems/leth/core"
 
 	//"github.com/ethereum/go-ethereum/accounts/abi/bind"
 )
