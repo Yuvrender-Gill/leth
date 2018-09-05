@@ -7,7 +7,6 @@ import (
 	"math/big"
 
 	"github.com/ChainSafeSystems/leth/logger"
-	"github.com/ChainSafeSystems/leth/jsonrpc"
 
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ethereum/go-ethereum/common"
@@ -56,12 +55,12 @@ func deployTestRPC(network Network, contract string) (string, error) {
 	data := fmt.Sprintf("%s", txBytes)
 	//fmt.Println(data)
 
-	txHash, err := jsonrpc.SendTransaction(data, network.Url)
+	txHash, err := SendTransaction(data, network.Url)
 	if err != nil {
 		return "", err
 	}
 
-	receipt, err := jsonrpc.GetTransactionReceipt(txHash, network.Url)
+	receipt, err := GetTransactionReceipt(txHash, network.Url)
 	if err != nil {
 		return "", err
 	}

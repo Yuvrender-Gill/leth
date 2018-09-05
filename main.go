@@ -10,7 +10,6 @@ import (
 	"io/ioutil"
 
 	"github.com/ChainSafeSystems/leth/core"
-	"github.com/ChainSafeSystems/leth/jsonrpc"
 	"github.com/ChainSafeSystems/leth/logger"
 	"github.com/ChainSafeSystems/leth/test"
 
@@ -194,7 +193,7 @@ func deploy(network string) {
 	//logger.Info(fmt.Sprintf("deploying %s to network %s", names, network))
 
 	if ntwk.Name == "testrpc" || ntwk.Name == "ganache" || ntwk.Name == "ganache-cli" {
-		accounts, err := jsonrpc.GetAccounts(ntwk.Url)
+		accounts, err := core.GetAccounts(ntwk.Url)
 		if err != nil {
 			logger.FatalError(fmt.Sprintf("unable to get accounts from client url: %s", err))
 		}
@@ -219,7 +218,7 @@ func deploy(network string) {
 		}
 	}
 
-	// blockNum, err := jsonrpc.GetBlockNumber(ntwk.Url)
+	// blockNum, err := core.GetBlockNumber(ntwk.Url)
 	// if err != nil {
 	// 	logger.Error(fmt.Sprintf("%s", err))
 	// }
