@@ -32,9 +32,13 @@ func main() {
 	compileCommand := flag.NewFlagSet("compile", flag.ExitOnError)
 	bindFlag := compileCommand.Bool("bind", true, "specify whether to create bindings for contracts while compiling")
 
+	// migrate subcommand 
+	migrateCommand := flag.NewFlagSet("migrate", flag.ExitOnError)
+	network := migrateCommand.String("network", "default", "specify network to connect to (configured in config.json)")
+
 	// deploy subcommand and flags
 	deployCommand := flag.NewFlagSet("deploy", flag.ExitOnError)
-	network := deployCommand.String("network", "default", "specify network to connect to (configured in config.json)")
+	network = deployCommand.String("network", "default", "specify network to connect to (configured in config.json)")
 
 	// test subcommand
 	testCommand := flag.NewFlagSet("test", flag.ExitOnError)
@@ -44,6 +48,7 @@ func main() {
 		fmt.Println("\t\x1b[93mleth help\x1b[0m")
 		fmt.Println("\tleth bind: create go bindings for all contracts in contracts/ directory and save in bindings/")
 		fmt.Println("\tleth compile: compile all contracts in contracts/ directory and save results in build/. `compile` will automatically execute `bind`; to compile with out binding, use --bind=false")
+		fmt.Println("\tleth migrate: run migration file and migrate to a network specified by --network")
 		fmt.Println("\tleth deploy: deploy all contracts in contracts/ directory and save results of deployment in deployed/. specify network name with `--network NETWORK_NAME`. if no network is provided, leth will connect to the default network as specified in config.json")
 		fmt.Println("\tleth test: run tests in test/ directory")
 		os.Exit(0)
@@ -58,6 +63,8 @@ func main() {
 				bindCommand.Parse(os.Args[2:])
 			case "compile":
 				compileCommand.Parse(os.Args[2:])
+			case "migrate":
+				migrateCommand.Parse(os.Args[2:])
 			case "deploy":
 				deployCommand.Parse(os.Args[2:])
 			case "test":
@@ -85,6 +92,11 @@ func main() {
 		os.Exit(0)	
 	} 
 
+	if migrateCommand.Parsed() {
+		migrate(*network)
+		os.Exit(0)
+	}
+
 	if deployCommand.Parsed() {
 		deploy(*network)
 		os.Exit(0)
@@ -106,7 +118,8 @@ func lethInit() {
 	}
 
 	os.Mkdir("./contracts", os.ModePerm)
-	os.Mkdir("./keystore", os.ModePerm)
+	os.Mkdir("./migrations", os.ModePerm)
+	//os.Mkdir("./keystore", os.ModePerm)
 	os.Mkdir("./test", os.ModePerm)
 
 	jsonStr, err := json.MarshalIndent(core.DefaultConfig, "", "\t")
@@ -138,6 +151,12 @@ func compile(bindFlag bool) ([]string) {
 		bind()
 	}
 	return contracts
+}
+
+// set up migration to a network
+// similar to deploy, except execute migrations/nigrate.go
+func migrate(network string) {
+
 }
 
 // set up deployment to network

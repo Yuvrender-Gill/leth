@@ -1,4 +1,5 @@
 build/
+bind/
 keystore/*
 leth
 bindings/
