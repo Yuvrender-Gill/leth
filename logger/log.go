@@ -5,6 +5,9 @@ import (
 	"os"
 )
 
+// todo: change these functions to allow multiple parameters
+// and format them inside the function
+
 func Info(out string) {
 	fmt.Println("\x1b[92minfo:\x1b[0m", out)
 }

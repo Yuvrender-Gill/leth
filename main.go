@@ -12,10 +12,11 @@ import (
 	"github.com/ChainSafeSystems/leth/core"
 	"github.com/ChainSafeSystems/leth/logger"
 	"github.com/ChainSafeSystems/leth/test"
+	"github.com/ChainSafeSystems/leth/migrations"
 
 	//"github.com/ethereum/go-ethereum/ethclient"
-	"github.com/ethereum/go-ethereum/accounts"
-	"github.com/ethereum/go-ethereum/accounts/keystore"
+	//"github.com/ethereum/go-ethereum/accounts"
+	//"github.com/ethereum/go-ethereum/accounts/keystore"
 )
 
 func main() {
@@ -93,7 +94,7 @@ func main() {
 	} 
 
 	if migrateCommand.Parsed() {
-		migrate(*network)
+		migrate()
 		os.Exit(0)
 	}
 
@@ -155,8 +156,8 @@ func compile(bindFlag bool) ([]string) {
 
 // set up migration to a network
 // similar to deploy, except execute migrations/nigrate.go
-func migrate(network string) {
-
+func migrate() {
+	migrations.Migrate()
 }
 
 // set up deployment to network
@@ -187,20 +188,7 @@ func deploy(network string) {
 
 	names := core.GetContractNames(contracts)
 
-	// read config file
-	file, err := core.ReadConfig()
-	if err != nil {
-		logger.FatalError("no config.json file found.")
-		os.Exit(1)
-	}
-
-	config, err := core.UnmarshalConfig(file)
-	if err != nil {
-		logger.FatalError(fmt.Sprintf("could not read config.json: %s", err))
-	}
-
-	ntwk := config.Networks[network]
-	ntwk.Name = network
+	ntwk := core.PrepNetwork(network)
 
 	// dial client for network
 	//ntwk := new(core.Network)
@@ -217,7 +205,7 @@ func deploy(network string) {
 			logger.FatalError(fmt.Sprintf("unable to get accounts from client url: %s", err))
 		}
 		//logger.Info(fmt.Sprintf("accounts: %s", accounts))
-		printAccounts(accounts)
+		core.PrintAccounts(accounts)
 
 		if ntwk.From == "" {
 			ntwk.From = accounts[0]
@@ -228,39 +216,16 @@ func deploy(network string) {
 			logger.FatalError("could not deploy contracts.")
 		}
 	} else {
-		ks := newKeyStore(ntwk.Keystore)
+		ks := core.NewKeyStore(ntwk.Keystore)
 		ksaccounts := ks.Accounts()
-		printKeystoreAccounts(ksaccounts)
+		core.PrintKeystoreAccounts(ksaccounts)
 		err = core.Deploy(client, ntwk, names, ks)
 		if err != nil {
 			logger.FatalError("could not deploy contracts.")
 		}
 	}
-
-	// blockNum, err := core.GetBlockNumber(ntwk.Url)
-	// if err != nil {
-	// 	logger.Error(fmt.Sprintf("%s", err))
-	// }
-	// logger.Info(fmt.Sprintf("block number: %s", blockNum))
 }
 
 func testrun() {
 	test.TestExample()
-}
-
-func newKeyStore(path string) (*keystore.KeyStore) {
-	newKeyStore := keystore.NewKeyStore(path, keystore.StandardScryptN, keystore.StandardScryptP)
-	return newKeyStore
-}
-
-func printAccounts(accounts []string) {
-	for i, account := range accounts {
-		logger.Info(fmt.Sprintf("account %d: %s", i, account))
-	}
-}
-
-func printKeystoreAccounts(accounts []accounts.Account) {
-	for i, account := range accounts {
-		logger.Info(fmt.Sprintf("account %d: %s", i, account.Address.Hex()))
-	}
 }
