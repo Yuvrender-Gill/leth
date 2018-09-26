@@ -43,6 +43,7 @@ func main() {
 
 	// test subcommand
 	testCommand := flag.NewFlagSet("test", flag.ExitOnError)
+	testContract := testCommand.String("test", "Test", "specify which function to call initially when testing")
 
 	flag.Parse() 
 	if *help {
@@ -104,7 +105,7 @@ func main() {
 	}
 
 	if testCommand.Parsed() {
-		testrun()
+		testrun(*testContract)
 		os.Exit(0)
 	}
 }
@@ -120,7 +121,7 @@ func lethInit() {
 
 	os.Mkdir("./contracts", os.ModePerm)
 	os.Mkdir("./migrations", os.ModePerm)
-	//os.Mkdir("./keystore", os.ModePerm)
+	os.Mkdir("./keystore", os.ModePerm)
 	os.Mkdir("./test", os.ModePerm)
 
 	jsonStr, err := json.MarshalIndent(core.DefaultConfig, "", "\t")
@@ -129,6 +130,12 @@ func lethInit() {
 	}
 
 	ioutil.WriteFile("./config.json", jsonStr, os.ModePerm)
+
+	mainFile, err := ioutil.ReadFile("./leth-main")
+	if err != nil {
+		logger.Error(fmt.Sprintf("%s", err))
+	}
+	ioutil.WriteFile("./main.go", mainFile, os.ModePerm)
 }
 
 func bind() {
@@ -226,6 +233,6 @@ func deploy(network string) {
 	}
 }
 
-func testrun() {
-	test.TestExample()
+func testrun(contract string) {
+	test.Test()
 }

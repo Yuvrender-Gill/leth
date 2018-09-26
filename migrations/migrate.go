@@ -7,13 +7,13 @@ import (
 )
 
 func Migrate() {
-	err := core.Migrate("testnet", "Example")
+	err := core.Migrate("testnet", "Token")
 	if err != nil {
-		fmt.Println("could not deploy Example.sol to testnet")
+		fmt.Println("could not deploy Token.sol to testnet")
 	}
 
-	err = core.Migrate("testnet", "ExampleLib")
-	if err != nil {
-		fmt.Println("could not deploy ExampleLib.sol to testnet")
-	}
+	// err = core.Migrate("testnet", "ExampleLib")
+	// if err != nil {
+	// 	fmt.Println("could not deploy ExampleLib.sol to testnet")
+	// }
 }
