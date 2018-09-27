@@ -200,13 +200,10 @@ func deploy(network string) {
 	ntwk := core.PrepNetwork(network)
 
 	// dial client for network
-	//ntwk := new(core.Network)
 	client, err := core.Dial(ntwk.Url)
 	if err != nil {
 		logger.FatalError("cannot dial client; likely incorrect url in config.json")
 	}
-
-	//logger.Info(fmt.Sprintf("deploying %s to network %s", names, network))
 
 	if ntwk.Name == "testrpc" || ntwk.Name == "ganache" || ntwk.Name == "ganache-cli" {
 		accounts, err := core.GetAccounts(ntwk.Url)
@@ -235,6 +232,9 @@ func deploy(network string) {
 	}
 }
 
+// note: all this function does is run the main function of the directory it's in.
+// this isn't specific to testing - could be used for migrations as well.
+// merge this with migrations; write documentation on how to use the main.go file
 func testrun(contract string) {
 	fp, _ := filepath.Abs("./main.go")
 	cmd := exec.Command("go", "run", fp)
