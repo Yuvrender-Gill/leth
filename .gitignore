@@ -1,5 +1,8 @@
 build/
+bind/
 keystore/*
 leth
 bindings/
 deployed/
+test/
+migrations/

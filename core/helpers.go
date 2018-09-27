@@ -8,6 +8,11 @@ import (
 	"path/filepath"
 	"io/ioutil"
 	"fmt"
+
+	"github.com/ethereum/go-ethereum/accounts"
+	"github.com/ethereum/go-ethereum/accounts/keystore"
+
+	"github.com/ChainSafeSystems/leth/logger"
 )
 
 func ReadConfig() ([]byte, error) {
@@ -151,4 +156,21 @@ func BinToSol(contracts []string) ([]string) {
 		names = append(names, fmt.Sprintf("%s.sol", name))
 	}
 	return names
+}
+
+func NewKeyStore(path string) (*keystore.KeyStore) {
+	newKeyStore := keystore.NewKeyStore(path, keystore.StandardScryptN, keystore.StandardScryptP)
+	return newKeyStore
+}
+
+func PrintAccounts(accounts []string) {
+	for i, account := range accounts {
+		logger.Info(fmt.Sprintf("account %d: %s", i, account))
+	}
+}
+
+func PrintKeystoreAccounts(accounts []accounts.Account) {
+	for i, account := range accounts {
+		logger.Info(fmt.Sprintf("account %d: %s", i, account.Address.Hex()))
+	}
 }

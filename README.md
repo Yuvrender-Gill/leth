@@ -44,6 +44,8 @@ keystore setup: if you have an existing geth keystore, copy the keystore/ direct
 
 `leth deploy` to deploy contracts to network
 
+`leth test` to run the tests as specified in the project main.go
+
 the default network to connect to is `default`. if you wish to connect to another network (as specified in config.json), use `leth deploy --network network_name`
 
 see config.json for example network configurations.

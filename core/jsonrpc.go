@@ -1,4 +1,4 @@
-package jsonrpc
+package core
 
 import (
 	//"fmt"
@@ -35,7 +35,7 @@ type Receipt struct {
      Status string 					`json:"status"`
 }
 
-// this function gets the current block number by calling "eth_blockNumber"
+// this function gets the accounts in the client by calling "eth_accounts"
 func GetAccounts(url string) ([]string, error) {
 	client := &http.Client{}
 	var jsonBytes = []byte(`{"jsonrpc":"2.0","method":"eth_accounts","params":[],"id":1}`)

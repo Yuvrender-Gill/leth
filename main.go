@@ -5,18 +5,20 @@ import (
 	"log"
 	"flag"
 	"os"
+	"os/exec"
 	"path"
+	"path/filepath"
 	"encoding/json"
 	"io/ioutil"
 
 	"github.com/ChainSafeSystems/leth/core"
-	"github.com/ChainSafeSystems/leth/jsonrpc"
 	"github.com/ChainSafeSystems/leth/logger"
-	"github.com/ChainSafeSystems/leth/test"
+	//"github.com/ChainSafeSystems/leth/test"
+	"github.com/ChainSafeSystems/leth/migrations"
 
 	//"github.com/ethereum/go-ethereum/ethclient"
-	"github.com/ethereum/go-ethereum/accounts"
-	"github.com/ethereum/go-ethereum/accounts/keystore"
+	//"github.com/ethereum/go-ethereum/accounts"
+	//"github.com/ethereum/go-ethereum/accounts/keystore"
 )
 
 func main() {
@@ -33,18 +35,24 @@ func main() {
 	compileCommand := flag.NewFlagSet("compile", flag.ExitOnError)
 	bindFlag := compileCommand.Bool("bind", true, "specify whether to create bindings for contracts while compiling")
 
+	// migrate subcommand 
+	migrateCommand := flag.NewFlagSet("migrate", flag.ExitOnError)
+	network := migrateCommand.String("network", "default", "specify network to connect to (configured in config.json)")
+
 	// deploy subcommand and flags
 	deployCommand := flag.NewFlagSet("deploy", flag.ExitOnError)
-	network := deployCommand.String("network", "default", "specify network to connect to (configured in config.json)")
+	network = deployCommand.String("network", "default", "specify network to connect to (configured in config.json)")
 
 	// test subcommand
 	testCommand := flag.NewFlagSet("test", flag.ExitOnError)
+	testContract := testCommand.String("test", "Test", "specify which function to call initially when testing")
 
 	flag.Parse() 
 	if *help {
 		fmt.Println("\t\x1b[93mleth help\x1b[0m")
 		fmt.Println("\tleth bind: create go bindings for all contracts in contracts/ directory and save in bindings/")
 		fmt.Println("\tleth compile: compile all contracts in contracts/ directory and save results in build/. `compile` will automatically execute `bind`; to compile with out binding, use --bind=false")
+		fmt.Println("\tleth migrate: run migration file and migrate to a network specified by --network")
 		fmt.Println("\tleth deploy: deploy all contracts in contracts/ directory and save results of deployment in deployed/. specify network name with `--network NETWORK_NAME`. if no network is provided, leth will connect to the default network as specified in config.json")
 		fmt.Println("\tleth test: run tests in test/ directory")
 		os.Exit(0)
@@ -59,6 +67,8 @@ func main() {
 				bindCommand.Parse(os.Args[2:])
 			case "compile":
 				compileCommand.Parse(os.Args[2:])
+			case "migrate":
+				migrateCommand.Parse(os.Args[2:])
 			case "deploy":
 				deployCommand.Parse(os.Args[2:])
 			case "test":
@@ -86,13 +96,18 @@ func main() {
 		os.Exit(0)	
 	} 
 
+	if migrateCommand.Parsed() {
+		migrate()
+		os.Exit(0)
+	}
+
 	if deployCommand.Parsed() {
 		deploy(*network)
 		os.Exit(0)
 	}
 
 	if testCommand.Parsed() {
-		testrun()
+		testrun(*testContract)
 		os.Exit(0)
 	}
 }
@@ -107,6 +122,7 @@ func lethInit() {
 	}
 
 	os.Mkdir("./contracts", os.ModePerm)
+	os.Mkdir("./migrations", os.ModePerm)
 	os.Mkdir("./keystore", os.ModePerm)
 	os.Mkdir("./test", os.ModePerm)
 
@@ -116,6 +132,12 @@ func lethInit() {
 	}
 
 	ioutil.WriteFile("./config.json", jsonStr, os.ModePerm)
+
+	mainFile, err := ioutil.ReadFile("./leth-main")
+	if err != nil {
+		logger.Error(fmt.Sprintf("%s", err))
+	}
+	ioutil.WriteFile("./main.go", mainFile, os.ModePerm)
 }
 
 func bind() {
@@ -139,6 +161,12 @@ func compile(bindFlag bool) ([]string) {
 		bind()
 	}
 	return contracts
+}
+
+// set up migration to a network
+// similar to deploy, except execute migrations/nigrate.go
+func migrate() {
+	migrations.Migrate()
 }
 
 // set up deployment to network
@@ -169,37 +197,21 @@ func deploy(network string) {
 
 	names := core.GetContractNames(contracts)
 
-	// read config file
-	file, err := core.ReadConfig()
-	if err != nil {
-		logger.FatalError("no config.json file found.")
-		os.Exit(1)
-	}
-
-	config, err := core.UnmarshalConfig(file)
-	if err != nil {
-		logger.FatalError(fmt.Sprintf("could not read config.json: %s", err))
-	}
-
-	ntwk := config.Networks[network]
-	ntwk.Name = network
+	ntwk := core.PrepNetwork(network)
 
 	// dial client for network
-	//ntwk := new(core.Network)
 	client, err := core.Dial(ntwk.Url)
 	if err != nil {
 		logger.FatalError("cannot dial client; likely incorrect url in config.json")
 	}
 
-	//logger.Info(fmt.Sprintf("deploying %s to network %s", names, network))
-
 	if ntwk.Name == "testrpc" || ntwk.Name == "ganache" || ntwk.Name == "ganache-cli" {
-		accounts, err := jsonrpc.GetAccounts(ntwk.Url)
+		accounts, err := core.GetAccounts(ntwk.Url)
 		if err != nil {
 			logger.FatalError(fmt.Sprintf("unable to get accounts from client url: %s", err))
 		}
 		//logger.Info(fmt.Sprintf("accounts: %s", accounts))
-		printAccounts(accounts)
+		core.PrintAccounts(accounts)
 
 		if ntwk.From == "" {
 			ntwk.From = accounts[0]
@@ -210,39 +222,26 @@ func deploy(network string) {
 			logger.FatalError("could not deploy contracts.")
 		}
 	} else {
-		ks := newKeyStore(ntwk.Keystore)
+		ks := core.NewKeyStore(ntwk.Keystore)
 		ksaccounts := ks.Accounts()
-		printKeystoreAccounts(ksaccounts)
+		core.PrintKeystoreAccounts(ksaccounts)
 		err = core.Deploy(client, ntwk, names, ks)
 		if err != nil {
 			logger.FatalError("could not deploy contracts.")
 		}
 	}
-
-	// blockNum, err := jsonrpc.GetBlockNumber(ntwk.Url)
-	// if err != nil {
-	// 	logger.Error(fmt.Sprintf("%s", err))
-	// }
-	// logger.Info(fmt.Sprintf("block number: %s", blockNum))
 }
 
-func testrun() {
-	test.TestExample()
-}
-
-func newKeyStore(path string) (*keystore.KeyStore) {
-	newKeyStore := keystore.NewKeyStore(path, keystore.StandardScryptN, keystore.StandardScryptP)
-	return newKeyStore
-}
-
-func printAccounts(accounts []string) {
-	for i, account := range accounts {
-		logger.Info(fmt.Sprintf("account %d: %s", i, account))
-	}
-}
-
-func printKeystoreAccounts(accounts []accounts.Account) {
-	for i, account := range accounts {
-		logger.Info(fmt.Sprintf("account %d: %s", i, account.Address.Hex()))
+// note: all this function does is run the main function of the directory it's in.
+// this isn't specific to testing - could be used for migrations as well.
+// merge this with migrations; write documentation on how to use the main.go file
+func testrun(contract string) {
+	fp, _ := filepath.Abs("./main.go")
+	cmd := exec.Command("go", "run", fp)
+	stdout, err := cmd.CombinedOutput()
+	out := string(stdout)
+	logger.Info(fmt.Sprintf("executing %s...\n%s", fp, out))
+	if err != nil {
+		logger.Error(fmt.Sprintf("%s", err))
 	}
 }
