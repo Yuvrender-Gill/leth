@@ -5,13 +5,15 @@ import (
 	"log"
 	"flag"
 	"os"
+	"os/exec"
 	"path"
+	"path/filepath"
 	"encoding/json"
 	"io/ioutil"
 
 	"github.com/ChainSafeSystems/leth/core"
 	"github.com/ChainSafeSystems/leth/logger"
-	"github.com/ChainSafeSystems/leth/test"
+	//"github.com/ChainSafeSystems/leth/test"
 	"github.com/ChainSafeSystems/leth/migrations"
 
 	//"github.com/ethereum/go-ethereum/ethclient"
@@ -234,5 +236,12 @@ func deploy(network string) {
 }
 
 func testrun(contract string) {
-	test.Test()
+	fp, _ := filepath.Abs("./main.go")
+	cmd := exec.Command("go", "run", fp)
+	stdout, err := cmd.CombinedOutput()
+	out := string(stdout)
+	logger.Info(fmt.Sprintf("executing %s...\n%s", fp, out))
+	if err != nil {
+		logger.Error(fmt.Sprintf("%s", err))
+	}
 }

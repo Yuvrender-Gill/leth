@@ -3,18 +3,18 @@ package test
 import (
 	"fmt"
 	"log"
-	"io/ioutil"
-	"strings"
+	//"io/ioutil"
+	//"strings"
 	//"math/big"
 
 	"github.com/ChainSafeSystems/leth/bindings"
 	"github.com/ChainSafeSystems/leth/core"
 
-	"github.com/ethereum/go-ethereum/accounts/abi/bind"
+	//"github.com/ethereum/go-ethereum/accounts/abi/bind"
 )
 
-func TestExample() {
-	conn, err := core.NewConnection("ganache")
+func Test() {
+	conn, err := core.NewConnection("default")
 	if err != nil {
 		log.Fatalf("Failed to connect to the Ethereum client: %v", err)
 	}	
@@ -26,7 +26,7 @@ func TestExample() {
 	// }
 
 	// instantiate the contract and display its name
-	address, err := core.ContractAddress("Example", "ganache")
+	address, err := core.ContractAddress("Token", "default")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -46,16 +46,16 @@ func TestExample() {
 	fmt.Println("Contract owner:", owner.Hex())
 
 	// create a new transactor to write to the contract 
-	file, err := ioutil.ReadFile("./keystore/UTC--2018-07-31T19-43-24.789345360Z--e8b7b81f281a947840de4b23f40442b3843c5f49")
-	if err != nil {
-		log.Fatal(err)
-	}
-	auth, err := bind.NewTransactor(strings.NewReader(string(file)), "password")
-	if err != nil {
-		log.Fatal(err)
-	}
+	// file, err := ioutil.ReadFile("./keystore/UTC--2018-07-31T19-43-24.789345360Z--e8b7b81f281a947840de4b23f40442b3843c5f49")
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+	// auth, err := bind.NewTransactor(strings.NewReader(string(file)), "password")
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
 
-	fmt.Println(auth)
+	// fmt.Println(auth)
 
 	//exRaw := new(bindings.ExampleRaw)
 	// create a tx to call the fallback function
