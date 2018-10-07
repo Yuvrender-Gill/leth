@@ -133,10 +133,14 @@ func lethInit() {
 
 	ioutil.WriteFile("./config.json", jsonStr, os.ModePerm)
 
-	mainFile, err := ioutil.ReadFile("./leth-main")
-	if err != nil {
-		logger.Error(fmt.Sprintf("%s", err))
-	}
+	mainStr := "package main\n\n" +
+				"import (\n" +
+					"\t// \"your-project/test\"\n" +
+				")\n\n" +
+				"func main() {\n" +
+					"\ttest.Test()\n" +
+				"}"
+	mainFile :=  []byte(mainStr)
 	ioutil.WriteFile("./main.go", mainFile, os.ModePerm)
 }
 

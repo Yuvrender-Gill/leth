@@ -1,9 +1,0 @@
-package main
-
-import (
-	// "your-project/test"
-)
-
-func main() {
-	test.Test()
-}
