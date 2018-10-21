@@ -49,3 +49,7 @@ keystore setup: if you have an existing geth keystore, copy the keystore/ direct
 the default network to connect to is `default`. if you wish to connect to another network (as specified in config.json), use `leth deploy --network network_name`
 
 see config.json for example network configurations.
+
+# example 
+
+for an example please see [this repo](https://github.com/noot/token) using leth to write tests for a simple token contract.
